@@ -1,3 +1,0 @@
-These layouts were borrowed and converted from
-https://inst.eecs.berkeley.edu/~cs188/fa18/
-
