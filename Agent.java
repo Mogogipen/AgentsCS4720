@@ -6,14 +6,14 @@ public class Agent implements Runnable {
 	
 	private HashMap<String, Boolean> stateHash;
 	private LinkedList<AgentAction> actionQueue;
-	private GameObject player;
 	private State map;
 	
 	private Boolean finished;
 	private Search type;
 	
-	Agent(GameObject p, String[][] m, Search t) {
-		player = p;
+	private long timer;
+	
+	Agent(String[][] m, Search t) {
 		map = new State(m);
 		type = t;
 		stateHash = new HashMap<String, Boolean>();
@@ -36,17 +36,20 @@ public class Agent implements Runnable {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map);
 		while(!finished) {
-			// Check if current node is goal state
-			currentState.isGoalState();
+			// Check if current node is goal state, then break
+			if (currentState.isGoalState()) {
+				finished = true;
+				break;
+			}
 			
 			// Add new nodes
-			ArrayList<State> add = new ArrayList<State>();
-			add.add(currentState.moveDown());
-			add.add(currentState.moveUp());
-			add.add(currentState.moveRight());
-			add.add(currentState.moveLeft());
-			add.add(currentState.pickUp());
-			for (State s : add) {
+			ArrayList<State> newState = new ArrayList<State>();
+			newState.add(currentState.moveDown());
+			newState.add(currentState.moveUp());
+			newState.add(currentState.moveRight());
+			newState.add(currentState.moveLeft());
+			newState.add(currentState.pickUp());
+			for (State s : newState) {
 				String hash = s.toHash();
 				if (s != null && !stateHash.containsKey(hash) ) {
 					stateHash.put(hash, true);
@@ -54,8 +57,15 @@ public class Agent implements Runnable {
 				}
 			}
 			
+			// Get the next node in the queue
 			currentState = searchQueue.pop();
+			
+			// Test if it's taking too long
+			if (System.nanoTime()-timer > 100000) {
+				break;
+			}
 		}
+		actionQueue = currentState.getActions();
 	}
 	
 	private void DFS() {
@@ -68,12 +78,15 @@ public class Agent implements Runnable {
 
 	@Override
 	public void run() {
+		long start = System.nanoTime();
+		timer = start;
 		if (type == Search.BFS)
 			BFS();
 		else if (type == Search.DFS)
 			DFS();
 		else
 			System.out.println("Search parameter failure");
+		long stop = System.nanoTime();
 		finished = true;
 		return;
 	}
@@ -84,6 +97,7 @@ class State {
 	private String[][] map;
 	private int xPos;
 	private int yPos;
+	private LinkedList<AgentAction> actionsToCurrentState;
 	
 	//
 	// Constructors
@@ -110,14 +124,16 @@ class State {
 				map[i][j] = new String(s.map[i][j]);
 			}
 		}
+		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
 		xPos = s.xPos;
 		yPos = s.yPos;
 	}
 	
-	private State(State s, int x, int y) {
+	private State(State s, int x, int y, AgentAction a) {
 		this(s);
 		xPos = x;
 		yPos = y;
+		actionsToCurrentState.add(a);
 	}
 	
 	//
@@ -128,25 +144,25 @@ class State {
 		if (map[xPos][yPos+1].equals("w")) {
 			return null;
 		}
-		return new State(this, xPos, yPos+1);
+		return new State(this, xPos, yPos+1, AgentAction.moveUp);
 	}
 	public State moveDown() {
 		if (map[xPos][yPos-1].equals("w"))
 			return null;
 		yPos--;
-		return new State(this, xPos, yPos-1);
+		return new State(this, xPos, yPos-1, AgentAction.moveDown);
 	}
 	public State moveLeft() {
 		if (map[xPos-1][yPos].equals("w"))
 			return null;
 		xPos--;
-		return new State(this, xPos-1, yPos);
+		return new State(this, xPos-1, yPos, AgentAction.moveLeft);
 	}
 	public State moveRight() {
 		if (map[xPos+1][yPos].equals("w"))
 			return null;
 		xPos++;
-		return new State(this, xPos+1, yPos);
+		return new State(this, xPos+1, yPos, AgentAction.moveRight);
 	}
 	public State pickUp() {
 		if (map[xPos][yPos].equals(".")) {
@@ -179,6 +195,10 @@ class State {
 			}
 		}
 		return true;
+	}
+	
+	public LinkedList<AgentAction> getActions() {
+		return getActions();
 	}
 }
 
