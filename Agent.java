@@ -70,7 +70,17 @@ public class Agent implements Runnable {
 	}
 	
 	private void DFS() {
-		
+		LinkedList<State> searchQueue = new LinkedList<State>();
+		State currentState = new State(map);
+		while(!finished) {
+			// Check if current node is goal state, then break
+			if (currentState.isGoalState()) {
+				finished = true;
+				break;
+			}
+			
+			// Add 
+		}
 	}
 	
 	public static void main(String[] args) {
