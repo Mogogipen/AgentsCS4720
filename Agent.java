@@ -22,7 +22,7 @@ public class Agent implements Runnable {
 	}
 	
 	public AgentAction nextAction() {
-		if (finished) {
+		if (finished && !actionQueue.isEmpty()) {
 			return actionQueue.pop();
 		}
 		return AgentAction.doNothing;
@@ -50,10 +50,12 @@ public class Agent implements Runnable {
 			newState.add(currentState.moveLeft());
 			newState.add(currentState.pickUp());
 			for (State s : newState) {
-				String hash = s.toHash();
-				if (s != null && !stateHash.containsKey(hash) ) {
-					stateHash.put(hash, true);
-					searchQueue.add(s);
+				if (s != null) {
+					String hash = s.toHash();
+					if (s != null && !stateHash.containsKey(hash) ) {
+						stateHash.put(hash, true);
+						searchQueue.add(s);
+					}
 				}
 			}
 			
@@ -61,19 +63,15 @@ public class Agent implements Runnable {
 			currentState = searchQueue.pop();
 			
 			// Test if it's taking too long
-			if (System.nanoTime()-timer > 100000) {
+			if (System.nanoTime()-timer > 10000000) {
 				break;
 			}
 		}
 		actionQueue = currentState.getActions();
-		actionQueue.add(AgentAction.declareVictory);
+//		actionQueue.add(AgentAction.declareVictory);
 	}
 	
 	private void DFS() {
-		
-	}
-	
-	public static void main(String[] args) {
 		
 	}
 
@@ -89,6 +87,9 @@ public class Agent implements Runnable {
 			System.out.println("Search parameter failure");
 		long stop = System.nanoTime();
 		finished = true;
+		for (int i = 0; i < actionQueue.size(); i++) {
+			System.out.println(actionQueue.get(i).toString());
+		}
 		return;
 	}
 
@@ -116,6 +117,7 @@ class State {
 					map[i][j] = new String(m[i][j]);
 			}
 		}
+		actionsToCurrentState = new LinkedList<AgentAction>();
 	}
 	
 	State(State s) {
@@ -150,19 +152,16 @@ class State {
 	public State moveDown() {
 		if (map[xPos][yPos-1].equals("w"))
 			return null;
-		yPos--;
 		return new State(this, xPos, yPos-1, AgentAction.moveDown);
 	}
 	public State moveLeft() {
 		if (map[xPos-1][yPos].equals("w"))
 			return null;
-		xPos--;
 		return new State(this, xPos-1, yPos, AgentAction.moveLeft);
 	}
 	public State moveRight() {
 		if (map[xPos+1][yPos].equals("w"))
 			return null;
-		xPos++;
 		return new State(this, xPos+1, yPos, AgentAction.moveRight);
 	}
 	public State pickUp() {
@@ -199,7 +198,7 @@ class State {
 	}
 	
 	public LinkedList<AgentAction> getActions() {
-		return getActions();
+		return actionsToCurrentState;
 	}
 }
 

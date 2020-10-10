@@ -344,8 +344,8 @@ public class Screen extends JPanel implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		System.out.println("Key pressed, please hold");
-//		player.setNextMove(e,this);
+//		System.out.println("Key pressed, please hold");
+		player.setNextMove(e,this);
 	}
 
 	@Override

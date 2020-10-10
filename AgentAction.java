@@ -20,4 +20,24 @@ public class AgentAction {
 	public boolean isAnAction() {
 		return isAnAction;
 	}
+	
+	//Temp
+	@Override
+	public String toString() {
+		if(this == moveLeft)
+			return "left";
+		if(this == moveRight)
+			return "right";
+		if(this == moveUp)
+			return "up";
+		if(this == moveDown)
+			return "down";
+		if(this == pickupSomething)
+			return "pickup";
+		if(this == declareVictory)
+			return "victory";
+		if(this == doNothing)
+			return "noop";
+		return "fail";
+	}
 }
