@@ -158,6 +158,50 @@ public class GameObject {
 		
 	}
 	
+	public void setNextAgentMove(Agent a, Screen s) {
+		AgentAction proposedAction = a.nextAction();
+		//		System.out.println("Key Event " + keyEventCode);
+
+		int col = getColLocation();
+		int row = getRowLocation();
+
+		if(proposedAction == AgentAction.moveRight) {
+			if(s.isValidMove(row,col+1)) {
+				setColLocation(col+1);
+				nextMove = AgentAction.moveRight;
+			}
+		}
+		else if(proposedAction == AgentAction.moveLeft) {
+			if(s.isValidMove(row,col-1)) {
+				setColLocation(col-1);
+				nextMove = AgentAction.moveLeft;
+			}
+		}
+		else if(proposedAction == AgentAction.moveUp) {
+			if(s.isValidMove(row-1,col)) {
+				setRowLocation(row-1);
+				nextMove = AgentAction.moveUp;
+			}
+		}
+		else if(proposedAction == AgentAction.moveDown) {
+			if(s.isValidMove(row+1,col)) {
+				setRowLocation(row+1);
+				nextMove = AgentAction.moveDown;
+			}
+		}
+		else if (proposedAction == AgentAction.declareVictory) {//Player Declares Victory
+			nextMove = AgentAction.declareVictory;
+		}
+		else if(proposedAction == AgentAction.pickupSomething) {
+			//pickup gold/elixer
+			nextMove = AgentAction.pickupSomething;
+		}
+		else {
+//			System.out.println("Unknown key event " + keyEventCode);
+			nextMove = AgentAction.doNothing;
+		}
+	}
+	
 	public AgentAction getMove() {
 		AgentAction n = nextMove; //one you pick something, don't keep repeating it
 		nextMove = AgentAction.doNothing;

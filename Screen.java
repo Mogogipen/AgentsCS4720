@@ -46,6 +46,8 @@ public class Screen extends JPanel implements KeyListener{
 	private int numEnemyHits;
 	private String mapName;
 	private int startingGold;
+	
+	private Agent agent;
 
 
 	public Screen(String theMapName, String [][] theMap) {
@@ -91,6 +93,11 @@ public class Screen extends JPanel implements KeyListener{
 	}
 
 	private void setupInitialVariables(String theMapName, String[][] theMap) {
+		
+		//Start the agent
+		agent = new Agent(theMap, Search.BFS);
+		Thread agentThread = new Thread(agent);
+		agentThread.start();
 
 		//Just in case things don't work so well with the map
 		this.setSize(10*tileSize,10*tileSize);
@@ -233,6 +240,10 @@ public class Screen extends JPanel implements KeyListener{
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
 		
+		if(agent.isFinished()) {
+			player.setNextAgentMove(agent, this);
+		}
+		
 		if(playerDeclaresVictory) {
 			g.clearRect(0, 0, this.getWidth(), this.getHeight());
 			g.drawString("Map: " + mapName, 3, 20);
@@ -333,8 +344,8 @@ public class Screen extends JPanel implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		//System.out.println("Key pressed");
-		player.setNextMove(e,this);
+		System.out.println("Key pressed, please hold");
+//		player.setNextMove(e,this);
 	}
 
 	@Override

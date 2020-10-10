@@ -66,6 +66,7 @@ public class Agent implements Runnable {
 			}
 		}
 		actionQueue = currentState.getActions();
+		actionQueue.add(AgentAction.declareVictory);
 	}
 	
 	private void DFS() {
