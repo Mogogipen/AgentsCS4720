@@ -42,19 +42,24 @@ public class Agent implements Runnable {
 				break;
 			}
 			
-			// Add new nodes
-			ArrayList<State> newState = new ArrayList<State>();
-			newState.add(currentState.pickUp());
-			newState.add(currentState.moveDown());
-			newState.add(currentState.moveUp());
-			newState.add(currentState.moveRight());
-			newState.add(currentState.moveLeft());
-			for (State s : newState) {
-				if (s != null) {
-					String hash = s.toHash();
-					if (!stateHash.containsKey(hash) ) {
-						stateHash.put(hash, true);
-						searchQueue.add(s);
+			// Add new nodes to queue
+			State pickUpTest = currentState.pickUp();
+			if (pickUpTest != null) {
+				stateHash.put(pickUpTest.toHash(), true);
+				searchQueue.add(pickUpTest);
+			} else {
+				ArrayList<State> newState = new ArrayList<State>();
+				newState.add(currentState.moveDown());
+				newState.add(currentState.moveUp());
+				newState.add(currentState.moveRight());
+				newState.add(currentState.moveLeft());
+				for (State s : newState) {
+					if (s != null) {
+						String hash = s.toHash();
+						if (!stateHash.containsKey(hash) ) {
+							stateHash.put(hash, true);
+							searchQueue.add(s);
+						}
 					}
 				}
 			}
@@ -135,113 +140,6 @@ public class Agent implements Runnable {
 		return;
 	}
 
-}
-
-class State {
-	private String[][] map;
-	private int xPos;
-	private int yPos;
-	private LinkedList<AgentAction> actionsToCurrentState;
-	
-	//
-	// Constructors
-	//
-	
-	State(String[][] m) {
-		map = new String[m.length][m[0].length];
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[i].length; j++) {
-				if (m[i][j].equals("S")) {
-					xPos = i;
-					yPos = j;
-					map[i][j] = " ";
-				} else
-					map[i][j] = new String(m[i][j]);
-			}
-		}
-		actionsToCurrentState = new LinkedList<AgentAction>();
-	}
-	
-	State(State s) {
-		map = new String[s.map.length][s.map[0].length];
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[i].length; j++) {
-				map[i][j] = new String(s.map[i][j]);
-			}
-		}
-		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
-		xPos = s.xPos;
-		yPos = s.yPos;
-	}
-	
-	private State(State s, int x, int y, AgentAction a) {
-		this(s);
-		xPos = x;
-		yPos = y;
-		actionsToCurrentState.add(a);
-	}
-	
-	//
-	// Movement
-	//
-	
-	public State moveUp() {
-		if (map[xPos][yPos+1].equals("w")) {
-			return null;
-		}
-		return new State(this, xPos, yPos+1, AgentAction.moveRight);
-	}
-	public State moveDown() {
-		if (map[xPos][yPos-1].equals("w"))
-			return null;
-		return new State(this, xPos, yPos-1, AgentAction.moveLeft);
-	}
-	public State moveLeft() {
-		if (map[xPos-1][yPos].equals("w"))
-			return null;
-		return new State(this, xPos-1, yPos, AgentAction.moveUp);
-	}
-	public State moveRight() {
-		if (map[xPos+1][yPos].equals("w"))
-			return null;
-		return new State(this, xPos+1, yPos, AgentAction.moveDown);
-	}
-	public State pickUp() {
-		if (map[xPos][yPos].equals(".")) {
-			State result = new State(this, xPos, yPos, AgentAction.pickupSomething);
-			result.map[xPos][yPos] = " ";
-			return result;
-		}
-		return null;
-	}
-	
-	//
-	// Miscellaneous
-	//
-	
-	public String toHash() {
-		String result = ("" + xPos) + yPos;
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[0].length; j++) {
-				result += map[i][j];
-			}
-		}
-		return result;
-	}
-	
-	public boolean isGoalState() {
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j].equals("."))
-					return false;
-			}
-		}
-		return true;
-	}
-	
-	public LinkedList<AgentAction> getActions() {
-		return actionsToCurrentState;
-	}
 }
 
 enum Search {

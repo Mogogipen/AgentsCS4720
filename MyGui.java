@@ -109,7 +109,7 @@ public class MyGui extends JFrame{
 	public static void main(String [] args){
 		//loadAllFiles();
 		//new MyGui();
-		new MyGui(new File("DungeonLayouts\\oddSearch.txt"));
+		new MyGui(new File("DungeonLayouts\\openSearch.txt"));
 		
 		/*	testSearch
 			tinySafeSearch
