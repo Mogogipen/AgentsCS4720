@@ -94,8 +94,21 @@ public class Screen extends JPanel implements KeyListener{
 
 	private void setupInitialVariables(String theMapName, String[][] theMap) {
 		
-		//Start the agent
-		agent = new Agent(theMap, Search.BFS);
+		//Start the agent with user input
+		Scanner agentQuery = new Scanner(System.in);
+		System.out.println("Please enter search method (BFS or DFS): ");
+		String searchType = agentQuery.nextLine();
+		agentQuery.close();
+		Search type;
+		if (searchType.toUpperCase().equals("BFS"))
+			type = Search.BFS;
+		else if (searchType.toUpperCase().equals("DFS"))
+			type = Search.DFS;
+		else {
+			System.out.println("Invalid search, using BFS");
+			type = Search.BFS;
+		}
+		agent = new Agent(theMap, type);
 		Thread agentThread = new Thread(agent);
 		agentThread.start();
 

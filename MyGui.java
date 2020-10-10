@@ -109,7 +109,23 @@ public class MyGui extends JFrame{
 	public static void main(String [] args){
 		//loadAllFiles();
 		//new MyGui();
-		new MyGui(new File("DungeonLayouts\\trickySearch.txt"));
+		new MyGui(new File("DungeonLayouts\\oddSearch.txt"));
+		
+		/*	testSearch
+			tinySafeSearch
+			tinySearch
+			greedySearch
+			smallSafeSearch
+			smallSearch
+			openSearch
+			boxSearch
+			mediumSafeSearch
+			mediumSearch
+			bigSafeSearch
+			bigSearch
+			oddSearch
+			trickySearch
+		 */
 		
 //		String[]vacuumWorld =
 //			{"wwww",

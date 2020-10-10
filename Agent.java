@@ -44,11 +44,11 @@ public class Agent implements Runnable {
 			
 			// Add new nodes
 			ArrayList<State> newState = new ArrayList<State>();
+			newState.add(currentState.pickUp());
 			newState.add(currentState.moveDown());
 			newState.add(currentState.moveUp());
 			newState.add(currentState.moveRight());
 			newState.add(currentState.moveLeft());
-			newState.add(currentState.pickUp());
 			for (State s : newState) {
 				if (s != null) {
 					String hash = s.toHash();
@@ -58,6 +58,15 @@ public class Agent implements Runnable {
 					}
 				}
 			}
+			
+			// Timer
+//			long maxTime = 2000000000;
+//			maxTime *= 5;
+//			long timeTaken = System.nanoTime()-timer;
+//			if (timeTaken > maxTime) {
+//				System.out.println("Took too long");
+//				return;
+//			}
 			
 			// Get the next node in the queue
 			currentState = searchQueue.pop();
@@ -72,7 +81,10 @@ public class Agent implements Runnable {
 	}
 	
 	private void DFS(State currentState) {
-//		Check if current node is goal state, then break
+		// Hash
+		String hash = currentState.toHash();
+		stateHash.put(hash, true);
+		// Check if current node is goal state, then return
 		if (currentState.isGoalState()) {
 			finished = true;
 			actionQueue = currentState.getActions();
@@ -80,23 +92,36 @@ public class Agent implements Runnable {
 			return;
 		}
 		
-		if (!finished)
-			DFS(currentState.moveDown());
-		else if (!finished)
-			DFS(currentState.moveLeft());
-		else if (!finished)
-			DFS(currentState.moveRight());
-		else if (!finished)
-			DFS(currentState.moveUp());
-		else if (!finished)
-			DFS(currentState.pickUp());
-		return;
+		State nextState;
 		
+		if (!finished) {
+			nextState = currentState.pickUp();
+			if (nextState != null && !stateHash.containsKey(nextState.toHash()))
+				DFS(nextState);
+		} if (!finished) {
+			nextState = currentState.moveDown();
+			if (nextState != null && !stateHash.containsKey(nextState.toHash()))
+				DFS(nextState);
+		} if (!finished) {
+			nextState = currentState.moveUp();
+			if (nextState != null && !stateHash.containsKey(nextState.toHash()))
+				DFS(nextState);
+		} if (!finished) {
+			nextState = currentState.moveLeft();
+			if (nextState != null && !stateHash.containsKey(nextState.toHash()))
+				DFS(nextState);
+		} if (!finished) {
+			nextState = currentState.moveRight();
+			if (nextState != null && !stateHash.containsKey(nextState.toHash()))
+				DFS(nextState);
+		}
+		return;
 	}
 
 	@Override
 	public void run() {
 		long start = System.nanoTime();
+		timer = start;
 		if (type == Search.BFS)
 			BFS();
 		else if (type == Search.DFS)
