@@ -109,7 +109,7 @@ public class MyGui extends JFrame{
 	public static void main(String [] args){
 		//loadAllFiles();
 		//new MyGui();
-		new MyGui(new File("DungeonLayouts\\testMaze.txt"));
+		new MyGui(new File("DungeonLayouts\\trickySearch.txt"));
 		
 //		String[]vacuumWorld =
 //			{"wwww",
