@@ -83,7 +83,7 @@ public class State {
 	//
 	
 	public String toHash() {
-		String result = ("" + xPos) + yPos;
+		String result = String.format("%2d%2d", xPos, yPos);
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
 				result += map[i][j];

@@ -11,8 +11,6 @@ public class Agent implements Runnable {
 	private Boolean finished;
 	private Search type;
 	
-	private long timer;
-	
 	Agent(String[][] m, Search t) {
 		map = new State(m);
 		type = t;
@@ -33,6 +31,25 @@ public class Agent implements Runnable {
 	}
 	
 	private void BFS() {
+		
+		// If the state space is too large, cancel
+		String m = map.toHash();
+		long stateSpace = 0;
+		int gold = 0;
+		for (int i = 0; i < m.length(); i++) {
+			if (m.charAt(i) == '.') {
+				gold++;
+				stateSpace++;
+			}
+			if (m.charAt(i) == ' ')
+				stateSpace++;
+		}
+		stateSpace *= (long)Math.pow(2, gold);
+		if (stateSpace > 1000000) {
+			System.out.printf("State space too large: %,d\n", stateSpace);
+			return;
+		}
+		
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map);
 		while(!finished) {
@@ -64,15 +81,6 @@ public class Agent implements Runnable {
 				}
 			}
 			
-			// Timer
-//			long maxTime = 2000000000;
-//			maxTime *= 5;
-//			long timeTaken = System.nanoTime()-timer;
-//			if (timeTaken > maxTime) {
-//				System.out.println("Took too long");
-//				return;
-//			}
-			
 			// Get the next node in the queue
 			currentState = searchQueue.pop();
 		}
@@ -89,6 +97,7 @@ public class Agent implements Runnable {
 		// Hash
 		String hash = currentState.toHash();
 		stateHash.put(hash, true);
+		
 		// Check if current node is goal state, then return
 		if (currentState.isGoalState()) {
 			finished = true;
@@ -97,6 +106,7 @@ public class Agent implements Runnable {
 			return;
 		}
 		
+		// Go through the next possible movements (prioritizing pickup)
 		State nextState;
 		
 		if (!finished) {
@@ -126,17 +136,24 @@ public class Agent implements Runnable {
 	@Override
 	public void run() {
 		long start = System.nanoTime();
-		timer = start;
+		
+		// Run the appropriate algorithm
+		if (type == null)
+			return;
 		if (type == Search.BFS)
 			BFS();
 		else if (type == Search.DFS)
 			DFS();
 		else
 			System.out.println("Search parameter failure");
+		
+		// Print time taken and hash size to the console
 		long stop = System.nanoTime();
 		double timeTaken = (double)(stop-start)/1000000000;
-		finished = true;
-		System.out.printf("Time taken: %.3f seconds", (timeTaken));
+		System.out.printf("Time taken: %.3f seconds\n", (timeTaken));
+		
+		System.out.printf("HashMap size: %,d\n", stateHash.size());
+		
 		return;
 	}
 

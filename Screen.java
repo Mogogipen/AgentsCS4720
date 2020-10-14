@@ -105,8 +105,8 @@ public class Screen extends JPanel implements KeyListener{
 		else if (searchType.toUpperCase().equals("DFS"))
 			type = Search.DFS;
 		else {
-			System.out.println("Invalid search, using BFS");
-			type = Search.BFS;
+			System.out.println("Invalid search, agent deactivated.");
+			type = null;
 		}
 		agent = new Agent(theMap, type);
 		Thread agentThread = new Thread(agent);
