@@ -45,7 +45,7 @@ public class Agent implements Runnable {
 				stateSpace++;
 		}
 		stateSpace *= (long)Math.pow(2, gold);
-		if (stateSpace > 1000000) {
+		if (stateSpace > 1000000 || gold > 30) {
 			System.out.printf("State space too large: %,d\n", stateSpace);
 			return;
 		}
