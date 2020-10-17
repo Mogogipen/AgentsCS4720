@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,19 +35,22 @@ public class Agent implements Runnable {
 		
 		// If the state space is too large, cancel
 		String m = map.toHash();
-		long stateSpace = 0;
+		BigInteger stateSpace = BigInteger.ZERO;
 		int gold = 0;
 		for (int i = 0; i < m.length(); i++) {
 			if (m.charAt(i) == '.') {
 				gold++;
-				stateSpace++;
+				stateSpace = stateSpace.add(BigInteger.ONE);
 			}
 			if (m.charAt(i) == ' ')
-				stateSpace++;
+				stateSpace = stateSpace.add(BigInteger.ONE);
 		}
-		stateSpace *= (long)Math.pow(2, gold);
-		if (stateSpace > 1000000 || gold > 30) {
-			System.out.printf("State space too large: %,d\n", stateSpace);
+		BigInteger goldPower = BigInteger.TWO;
+		goldPower = goldPower.pow(gold);
+		stateSpace = stateSpace.multiply(goldPower);
+		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
+			System.out.printf("Possible state space too large: %,d\n", stateSpace);
+			actionQueue.add(AgentAction.declareVictory);
 			return;
 		}
 		
@@ -147,12 +151,14 @@ public class Agent implements Runnable {
 		else
 			System.out.println("Search parameter failure");
 		
-		// Print time taken and hash size to the console
+		// Print agent metrics to the console
 		long stop = System.nanoTime();
 		double timeTaken = (double)(stop-start)/1000000000;
 		System.out.printf("Time taken: %.3f seconds\n", (timeTaken));
 		
 		System.out.printf("HashMap size: %,d\n", stateHash.size());
+		
+		System.out.printf("Actions: %d\n", actionQueue.size()-1);
 		
 		return;
 	}
