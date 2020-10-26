@@ -45,7 +45,7 @@ public class Agent implements Runnable {
 			if (m.charAt(i) == ' ')
 				stateSpace = stateSpace.add(BigInteger.ONE);
 		}
-		BigInteger goldPower = BigInteger.TWO;
+		BigInteger goldPower = new BigInteger("2");
 		goldPower = goldPower.pow(gold);
 		stateSpace = stateSpace.multiply(goldPower);
 		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
