@@ -44,8 +44,18 @@ public class Search {
 			for (int i = 0; i < cities.length; i++) {
 				checkStates.add(swapCities(i, cities));
 			}
+			boolean noBetterFound = true;
+			int best = getRouteDistance(cities);
+			for (City[] ca : checkStates) {
+				int testBest = getRouteDistance(ca);
+				if (testBest < best) {
+					noBetterFound = false;
+					best = testBest;
+				}
+			}
 			
-			isBest = true;
+			if (noBetterFound)
+				isBest = true;
 		}
 		
 		return states;
