@@ -17,7 +17,8 @@ public class Search {
 //		states.add(c);
 //		return states;
 		
-//		hillClimbingSearch(cities);
+		hillClimbingSearch(cities);
+//		states = hillClimbingSearch(cities);
 		
 		//This returns quite a few
 		for(int i = 0; i < 10; i++) {
@@ -36,32 +37,46 @@ public class Search {
 	
 	private static ArrayList<City []> hillClimbingSearch(City[] cities) {
 		ArrayList<City []> states = new ArrayList<City []>();
-		ArrayList<City []> checkStates = new ArrayList<City []>();
 		
 		boolean isBest = false;
 		while(!isBest) {
+			ArrayList<City []> checkStates = new ArrayList<City []>();
+			for (int i = 0; i < cities.length; i++) {
+				checkStates.add(swapCities(i, cities));
+			}
+			
 			isBest = true;
 		}
 		
 		return states;
 	}
 	
-	private static int getTotalDistance(City[] cities) {
-		int result = 0;
+	// Returns a new City[] with the index swapped with the index that follows
+	private static City[] swapCities(int index, City[] cities) {
+		City[] result = new City[cities.length];
 		for (int i = 0; i < cities.length; i++) {
-			if (i == cities.length)
-				result += distance(cities[i], cities[0]);
-			else
-				result += distance(cities[i], cities[i+1]);
+			result[i] = cities[i];
+		}
+		if (index == cities.length - 1) {
+			City temp = cities[0];
+			cities[0] = cities[index];
+			cities[index] = temp;
+		} else {
+			City temp = cities[index];
+			cities[index] = cities[index + 1];
+			cities[index + 1] = temp;
 		}
 		return result;
 	}
 	
-	private static int distance(City a, City b) {
+	private static int getRouteDistance(City[] cities) {
 		int result = 0;
-		int deltaX = Math.abs(a.getX() - b.getX());
-		int deltaY = Math.abs(a.getY() - b.getY());
-		result = (int)Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+		for (int i = 0; i < cities.length; i++) {
+			if (i == cities.length)
+				result += cities[i].distance(cities[0]);
+			else
+				result += cities[i].distance(cities[i+1]);
+		}
 		return result;
 	}
 
