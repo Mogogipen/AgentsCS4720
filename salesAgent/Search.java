@@ -34,7 +34,7 @@ public class Search {
 		return states;
 	}
 	
-	public static ArrayList<City []> hillClimbingSearch(City[] cities) {
+	private static ArrayList<City []> hillClimbingSearch(City[] cities) {
 		ArrayList<City []> states = new ArrayList<City []>();
 		ArrayList<City []> checkStates = new ArrayList<City []>();
 		
@@ -59,6 +59,9 @@ public class Search {
 	
 	private static int distance(City a, City b) {
 		int result = 0;
+		int deltaX = Math.abs(a.getX() - b.getX());
+		int deltaY = Math.abs(a.getY() - b.getY());
+		result = (int)Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 		return result;
 	}
 
