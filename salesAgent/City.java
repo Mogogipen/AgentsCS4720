@@ -34,6 +34,10 @@ public class City {
 		this.y = y;
 	}
 	
+	public String toString() {
+		return String.format("(%d, %d)", x, y);
+	}
+	
 	
 	
 }
