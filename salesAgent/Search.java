@@ -18,9 +18,10 @@ public class Search {
 //		return states;
 		
 		// Search for the best using hill climbing
-		states = hillClimbingSearch(cities);
+//		states = hillClimbingSearch(cities);
 		
-		// Search for the best using 
+		// Search for the best using simulated annealing
+		states = simulatedAnnealingSearch(cities);
 		
 		//This returns quite a few
 //		for(int i = 0; i < 10; i++) {
@@ -34,6 +35,9 @@ public class Search {
 //			Collections.shuffle(tmp);
 //			states.add(tmp.toArray(tmpArray));
 //		}
+		
+		// Print comparison
+		System.out.printf("Starting route distance: %d\nFinal route distance: %d\n\n", getRouteDistance(cities), getRouteDistance(states.get(states.size()-1)));
 		return states;
 	}
 	
@@ -69,8 +73,51 @@ public class Search {
 				states.add(bestRoute);
 		}
 		
-		// Print comparison
-		System.out.printf("Starting route distance: %d\nFinal route distance: %d\n\n", getRouteDistance(cities), getRouteDistance(bestRoute));
+		return states;
+	}
+	
+	private static ArrayList<City []> simulatedAnnealingSearch(City[] cities) {
+		ArrayList<City []> states = new ArrayList<City []>();
+		states.add(cities);
+		
+		boolean isBest = false;
+		City[] currentRoute = cities;
+		int currentDistance = getRouteDistance(currentRoute);
+		double temperature = 1.0;
+		double deltaT = (1.0/cities.length)/2;
+		
+		while (!isBest) {
+			if (temperature < 0.01) {
+				states.addAll(hillClimbingSearch(currentRoute));
+				isBest = true;
+			}
+			
+			else {
+				// Generate next state
+				boolean nextGenerated = false;
+				while(!nextGenerated) {
+//					System.out.printf("%.4f\n", temperature);
+					// Two random indices in the route
+					int i1 = (int)(Math.random()*cities.length);
+					int i2 = (int)(Math.random()*cities.length);
+					if (i1 == i2);  // If the indices are identical, generate new ones
+					else {
+						// Swap the cities and switch if better, or if the temperature is just right;
+						City[] testRoute = swapCities(i1, i2, currentRoute);
+						int testDistance = getRouteDistance(testRoute);
+						if (testDistance < currentDistance || temperature > Math.random()) {
+							currentRoute = testRoute;
+							currentDistance = testDistance;
+							nextGenerated = true;
+						}
+					}
+				}
+				
+				// Decrease temperature and add the new route
+				temperature -= deltaT;
+				states.add(currentRoute);
+			}
+		}
 		
 		return states;
 	}
@@ -90,6 +137,19 @@ public class Search {
 		City temp = result[index];
 		result[index] = result[next];
 		result[next] = temp;
+		return result;
+	}
+	// Returns a new City[] with the elements swapped between the 2 given indices
+	private static City[] swapCities(int index1, int index2, City[] cities) {
+		City[] result = new City[cities.length];
+		// Copy the array
+		for (int i = 0; i < cities.length; i++)
+			result[i] = cities[i];
+		
+		// Swap the given indices
+		City temp = result[index1];
+		result[index1] = result[index2];
+		result[index2] = temp;
 		return result;
 	}
 	
