@@ -23,6 +23,9 @@ public class Search {
 		// Search for the best using simulated annealing
 		states = simulatedAnnealingSearch(cities);
 		
+		// Search for the best using a genetic algorithm
+//		states = geneticSearch(cities);
+		
 		//This returns quite a few
 //		for(int i = 0; i < 10; i++) {
 //			//Create a copy
@@ -122,6 +125,20 @@ public class Search {
 		return states;
 	}
 	
+	private static ArrayList<City[]> geneticSearch(City[] cities) {
+		ArrayList<City[]> states = new ArrayList<City[]>();
+		states.add(cities);
+		City[] bestRoute = new City[cities.length];
+		
+		//TODO: Do the steps: Generate population (1000), find best(50), breed the best(1000 new (40 per "couple")), repeat (100 iterations?)
+		ArrayList<City[]> population = generatePop(1000, cities);
+		ArrayList<City[]> best = findBest(50, population);
+		
+		states.add(bestRoute);
+		
+		return states;
+	}
+	
 	// Returns a new City[] with the index swapped with the index that follows
 	private static City[] swapCities(int index, City[] cities) {
 		City[] result = new City[cities.length];
@@ -153,6 +170,29 @@ public class Search {
 		return result;
 	}
 	
+	private static ArrayList<City []> generatePop(int count, City[] cities) {
+		ArrayList<City []> result = new ArrayList<City []>();
+		for (int i = 0; i < count; i++) {
+			// Copy array
+			City[] route = new City[cities.length];
+			for (int j = 0; j < cities.length; j++)
+				route[j] = cities[j];
+			
+			// Shuffle array and add to result
+			List<City> temp = Arrays.asList(route);
+			Collections.shuffle(temp);
+			result.add(temp.toArray(route));
+		}
+		return result;
+	}
+	
+	private static ArrayList<City []> findBest(int count, ArrayList<City []> pop) {
+		ArrayList<City[]> result = new ArrayList<City[]>();
+		//TODO add the algorithm
+		return result;
+	}
+	
+	// Returns the total distance for a route
 	private static int getRouteDistance(City[] cities) {
 		int result = 0;
 		for (int i = 0; i < cities.length; i++) {
