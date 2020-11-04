@@ -1,6 +1,7 @@
 package salesAgent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GeneticRoute implements Comparable<GeneticRoute>{
 	
@@ -57,18 +58,20 @@ public class GeneticRoute implements Comparable<GeneticRoute>{
 						itr = 0;
 				}
 			}
-			
-			// Display a warning, if there is a broken baby
-			for (int j = 0; j < baby.length; j++) {
-				for (int k = 0; k < baby.length; k++) {
-					if (baby[j] == baby[k])
-						baby[j] = null;
-				}
-				if (baby[j] == null) {
-					System.out.println("Broken Baby Warning");
-					break;
-				}
+
+			// Mutate the baby
+			boolean mutated = false;
+			while (!mutated) {
+				int i1 = (int)(Math.random()*route.length);
+				int i2 = (int)(Math.random()*route.length);
+				if (i1 == i2) continue;
+				
+				City tmp = baby[i1];
+				baby[i1] = baby[i2];
+				baby[i2] = tmp;
+				mutated = true;
 			}
+			
 			
 			// Make a full child and add it to the array
 			children.add(new GeneticRoute(baby));

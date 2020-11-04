@@ -40,10 +40,6 @@ public class Search {
 //			states.add(tmp.toArray(tmpArray));
 //		}
 		
-		GeneticRoute ga1 = new GeneticRoute(states.get(0));
-		GeneticRoute ga2 = new GeneticRoute(states.get(1));
-		System.out.printf("ga1: %d  ga2: %d  compVal: %d\n", ga1.getRouteDistance(), ga2.getRouteDistance(), ga1.compareTo(ga2));
-		
 		// Print comparison
 		System.out.printf("Starting route distance: %d\nFinal route distance: %d\n\n", getRouteDistance(cities), getRouteDistance(states.get(states.size()-1)));
 		return states;
@@ -140,13 +136,14 @@ public class Search {
 		ArrayList<GeneticRoute> population = generatePop(1000, cities);
 		ArrayList<GeneticRoute> best = new ArrayList<GeneticRoute>();
 		
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < cities.length; i++) {
 			// Find the best and its best
 			best = findBest(50, population);
 			GeneticRoute genBest = best.remove(best.size()-1);
 			if (bestRoute.compareTo(genBest) < 0)
 				bestRoute = genBest;
 			
+			// Breed the best
 			population = breedAll(1000, best);
 		}
 		
@@ -213,8 +210,8 @@ public class Search {
 			
 			// If a worse value can be found in the new array, remove the worst and add the new one
 			else if (result.lower(g) != null) {
-				result.remove(result.first());
-				result.add(g);
+				if (result.add(g))
+					result.remove(result.first());
 			}
 		}
 		
