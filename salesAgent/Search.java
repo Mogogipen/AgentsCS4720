@@ -131,7 +131,6 @@ public class Search {
 		states.add(cities);
 		GeneticRoute bestRoute = new GeneticRoute(cities);
 		
-		//TODO: Do the steps: Generate population (1000), find best(50), breed the best(1000 new (40 per "couple")), repeat (100 iterations?)
 		// Generate the starting population
 		ArrayList<GeneticRoute> population = generatePop(1000, cities);
 		ArrayList<GeneticRoute> best = new ArrayList<GeneticRoute>();
