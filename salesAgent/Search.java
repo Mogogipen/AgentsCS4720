@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 public class Search {
 	
@@ -21,10 +22,10 @@ public class Search {
 //		states = hillClimbingSearch(cities);
 		
 		// Search for the best using simulated annealing
-		states = simulatedAnnealingSearch(cities);
+//		states = simulatedAnnealingSearch(cities);
 		
 		// Search for the best using a genetic algorithm
-//		states = geneticSearch(cities);
+		states = geneticSearch(cities);
 		
 		//This returns quite a few
 //		for(int i = 0; i < 10; i++) {
@@ -38,6 +39,10 @@ public class Search {
 //			Collections.shuffle(tmp);
 //			states.add(tmp.toArray(tmpArray));
 //		}
+		
+		GeneticRoute ga1 = new GeneticRoute(states.get(0));
+		GeneticRoute ga2 = new GeneticRoute(states.get(1));
+		System.out.printf("ga1: %d  ga2: %d  compVal: %d\n", ga1.getRouteDistance(), ga2.getRouteDistance(), ga1.compareTo(ga2));
 		
 		// Print comparison
 		System.out.printf("Starting route distance: %d\nFinal route distance: %d\n\n", getRouteDistance(cities), getRouteDistance(states.get(states.size()-1)));
@@ -128,13 +133,24 @@ public class Search {
 	private static ArrayList<City[]> geneticSearch(City[] cities) {
 		ArrayList<City[]> states = new ArrayList<City[]>();
 		states.add(cities);
-		City[] bestRoute = new City[cities.length];
+		GeneticRoute bestRoute = new GeneticRoute(cities);
 		
 		//TODO: Do the steps: Generate population (1000), find best(50), breed the best(1000 new (40 per "couple")), repeat (100 iterations?)
-		ArrayList<City[]> population = generatePop(1000, cities);
-		ArrayList<City[]> best = findBest(50, population);
+		// Generate the starting population
+		ArrayList<GeneticRoute> population = generatePop(1000, cities);
+		ArrayList<GeneticRoute> best = new ArrayList<GeneticRoute>();
 		
-		states.add(bestRoute);
+		for(int i = 0; i < 100; i++) {
+			// Find the best and its best
+			best = findBest(50, population);
+			GeneticRoute genBest = best.remove(best.size()-1);
+			if (bestRoute.compareTo(genBest) < 0)
+				bestRoute = genBest;
+			
+			population = breedAll(1000, best);
+		}
+		
+		states.add(bestRoute.getRoute());
 		
 		return states;
 	}
@@ -170,30 +186,58 @@ public class Search {
 		return result;
 	}
 	
-	private static ArrayList<City []> generatePop(int count, City[] cities) {
-		ArrayList<City []> result = new ArrayList<City []>();
+	private static ArrayList<GeneticRoute> generatePop(int count, City[] cities) {
+		ArrayList<GeneticRoute> result = new ArrayList<GeneticRoute>();
 		for (int i = 0; i < count; i++) {
 			// Copy array
 			City[] route = new City[cities.length];
 			for (int j = 0; j < cities.length; j++)
 				route[j] = cities[j];
 			
-			// Shuffle array and add to result
+			// Shuffle array and add to result as GeneticRoute
 			List<City> temp = Arrays.asList(route);
 			Collections.shuffle(temp);
-			result.add(temp.toArray(route));
+			result.add(new GeneticRoute(temp.toArray(route)));
 		}
 		return result;
 	}
 	
-	private static ArrayList<City []> findBest(int count, ArrayList<City []> pop) {
-		ArrayList<City[]> result = new ArrayList<City[]>();
-		//TODO add the algorithm
+	private static ArrayList<GeneticRoute> findBest(int count, ArrayList<GeneticRoute> pop) {
+		TreeSet<GeneticRoute> result = new TreeSet<GeneticRoute>();
+		
+		// Find the best
+		for (GeneticRoute g : pop) {
+			// Add starting values
+			if (result.size() < count)
+				result.add(g);
+			
+			// If a worse value can be found in the new array, remove the worst and add the new one
+			else if (result.lower(g) != null) {
+				result.remove(result.first());
+				result.add(g);
+			}
+		}
+		
+		// Return an ArrayList
+		ArrayList<GeneticRoute> resultArray = new ArrayList<GeneticRoute>(result);
+		resultArray.add(result.last());
+		return resultArray;
+	}
+	
+	private static ArrayList<GeneticRoute> breedAll(int totalChildren, ArrayList<GeneticRoute> pop) {
+		ArrayList<GeneticRoute> result = new ArrayList<GeneticRoute>();
+		int childrenPerCouple = totalChildren/(pop.size()/2);
+		
+		// Breed every route with its neighbor
+		for (int i = 0; i < pop.size(); i += 2) {
+			result.addAll(pop.get(i).breed(pop.get(i+1), childrenPerCouple));
+		}
+		
 		return result;
 	}
 	
 	// Returns the total distance for a route
-	private static int getRouteDistance(City[] cities) {
+	public static int getRouteDistance(City[] cities) {
 		int result = 0;
 		for (int i = 0; i < cities.length; i++) {
 			if (i == cities.length - 1)
