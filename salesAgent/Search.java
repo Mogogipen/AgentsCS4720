@@ -136,9 +136,10 @@ public class Search {
 		ArrayList<GeneticRoute> best = new ArrayList<GeneticRoute>();
 		
 		for(int i = 0; i < cities.length; i++) {
-			// Find the best and its best
+			// Find the best 50 and the best 1 among them
 			best = findBest(50, population);
 			GeneticRoute genBest = best.remove(best.size()-1);
+//			System.out.println(genBest.getRouteDistance());
 			if (bestRoute.compareTo(genBest) < 0)
 				bestRoute = genBest;
 			
@@ -182,6 +183,7 @@ public class Search {
 		return result;
 	}
 	
+	// Returns an ArrayList of random routes from the cities array
 	private static ArrayList<GeneticRoute> generatePop(int count, City[] cities) {
 		ArrayList<GeneticRoute> result = new ArrayList<GeneticRoute>();
 		for (int i = 0; i < count; i++) {
@@ -198,6 +200,7 @@ public class Search {
 		return result;
 	}
 	
+	// Returns an ArrayList of the best within the given population
 	private static ArrayList<GeneticRoute> findBest(int count, ArrayList<GeneticRoute> pop) {
 		TreeSet<GeneticRoute> result = new TreeSet<GeneticRoute>();
 		
