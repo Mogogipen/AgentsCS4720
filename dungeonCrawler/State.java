@@ -1,5 +1,4 @@
 package dungeonCrawler;
-
 import java.util.LinkedList;
 
 public class State {

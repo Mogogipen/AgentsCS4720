@@ -1,5 +1,4 @@
 package dungeonCrawler;
-
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -12,32 +11,31 @@ public class GameObject {
 	private BufferedImage image;
 	private int imageWidth;
 	private int imageHeight;
-
+	
 	private int tileSize;
-
-	private AgentBrain brain;
+	
+	private AgentAction nextMove;
 
 	public GameObject(double col, double row, BufferedImage i, int tileSize){
 		this(col,row,i,i.getWidth(), i.getHeight(), tileSize);
 	}
-
+	
 	public GameObject(double col, double row, BufferedImage i, int imageWidth, int imageHeight, int tileSize){
 		setColLocationOnGraphics(col);
 		setRowLocationOnGraphics(row);
 		setImage(i);
 		setImageWidth(imageWidth);
 		setImageHeight(imageHeight);
-
-		brain = new AgentBrain();
-
+		
 		this.tileSize = tileSize;
+		nextMove = AgentAction.doNothing;
 	}
 
 	public void setImageWidthAndHeight(int imageWidth, int imageHeight){
 		setImageWidth(imageWidth);
 		setImageHeight(imageHeight);
 	}
-
+	
 	public int getImageWidth() {
 		return imageWidth;
 	}
@@ -65,7 +63,7 @@ public class GameObject {
 	public void setColLocationOnGraphics(double col) {
 		this.colOnGraphics = col;
 	}
-
+	
 	public void setColLocation(int col) {
 		this.colOnGraphics = col*tileSize;
 	}
@@ -73,7 +71,7 @@ public class GameObject {
 	public void incrementColOnGraphics(double col){
 		this.colOnGraphics += col;
 	}
-
+	
 	public void incrementCol(double col){
 		this.colOnGraphics += col+tileSize;
 	}
@@ -93,7 +91,7 @@ public class GameObject {
 	public void setRowLocation(int row) {
 		this.rowOnGraphics = row*tileSize;
 	}
-
+	
 	public void incrementRowOnGraphics(double row){
 		this.rowOnGraphics += row;
 	}
@@ -115,42 +113,100 @@ public class GameObject {
 			g.drawImage(image, (int)colOnGraphics,(int)rowOnGraphics, imageWidth, imageHeight, null);
 		}
 	}
-
+	
 	public void setNextMove(KeyEvent k, Screen s) {
 		int keyEventCode = k.getKeyCode();
 		//		System.out.println("Key Event " + keyEventCode);
 
+		int col = getColLocation();
+		int row = getRowLocation();
+
 		if(keyEventCode == KeyEvent.VK_RIGHT || keyEventCode == KeyEvent.VK_D) {
-			brain.addNextMove(AgentAction.moveRight);
+			if(s.isValidMove(row,col+1)) {
+				setColLocation(col+1);
+				nextMove = AgentAction.moveRight;
+			}
 		}
 		else if(keyEventCode == KeyEvent.VK_LEFT || keyEventCode == KeyEvent.VK_A) {
-			brain.addNextMove(AgentAction.moveLeft);
+			if(s.isValidMove(row,col-1)) {
+				setColLocation(col-1);
+				nextMove = AgentAction.moveLeft;
+			}
 		}
 		else if(keyEventCode == KeyEvent.VK_UP || keyEventCode == KeyEvent.VK_W) {
-			brain.addNextMove(AgentAction.moveUp);
+			if(s.isValidMove(row-1,col)) {
+				setRowLocation(row-1);
+				nextMove = AgentAction.moveUp;
+			}
 		}
 		else if(keyEventCode == KeyEvent.VK_DOWN || keyEventCode == KeyEvent.VK_S) {
-			brain.addNextMove(AgentAction.moveDown);
+			if(s.isValidMove(row+1,col)) {
+				setRowLocation(row+1);
+				nextMove = AgentAction.moveDown;
+			}
 		}
 		else if (keyEventCode == KeyEvent.VK_V) {//Player Declares Victory
-			brain.addNextMove(AgentAction.declareVictory);
+			nextMove = AgentAction.declareVictory;
 		}
 		else if(keyEventCode == KeyEvent.VK_SPACE) {
 			//pickup gold/elixer
-			brain.addNextMove(AgentAction.pickupSomething);
+			nextMove = AgentAction.pickupSomething;
 		}
 		else {
 			System.out.println("Unknown key event " + keyEventCode);
+			nextMove = AgentAction.doNothing;
 		}
-
+		
 	}
+	
+	public void setNextAgentMove(AgentBrain a, Screen s) {
+		AgentAction proposedAction = a.nextAction();
+		//		System.out.println("Key Event " + keyEventCode);
 
+		int col = getColLocation();
+		int row = getRowLocation();
+
+		if(proposedAction == AgentAction.moveRight) {
+			if(s.isValidMove(row,col+1)) {
+				setColLocation(col+1);
+				nextMove = AgentAction.moveRight;
+			}
+		}
+		else if(proposedAction == AgentAction.moveLeft) {
+			if(s.isValidMove(row,col-1)) {
+				setColLocation(col-1);
+				nextMove = AgentAction.moveLeft;
+			}
+		}
+		else if(proposedAction == AgentAction.moveUp) {
+			if(s.isValidMove(row-1,col)) {
+				setRowLocation(row-1);
+				nextMove = AgentAction.moveUp;
+			}
+		}
+		else if(proposedAction == AgentAction.moveDown) {
+			if(s.isValidMove(row+1,col)) {
+				setRowLocation(row+1);
+				nextMove = AgentAction.moveDown;
+			}
+		}
+		else if (proposedAction == AgentAction.declareVictory) {//Player Declares Victory
+			nextMove = AgentAction.declareVictory;
+		}
+		else if(proposedAction == AgentAction.pickupSomething) {
+			//pickup gold/elixer
+			nextMove = AgentAction.pickupSomething;
+		}
+		else {
+//			System.out.println("Unknown key event " + keyEventCode);
+			nextMove = AgentAction.doNothing;
+		}
+	}
+	
 	public AgentAction getMove() {
-		return brain.getNextMove();
+		AgentAction n = nextMove; //one you pick something, don't keep repeating it
+		nextMove = AgentAction.doNothing;
+		return n;
 	}
-
-	public void search(String [][] theMap) {
-		brain.search(theMap);
-	}
-
+	
 }

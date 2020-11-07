@@ -1,5 +1,4 @@
 package dungeonCrawler;
-
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -48,6 +47,8 @@ public class Screen extends JPanel implements KeyListener{
 	private int numEnemyHits;
 	private String mapName;
 	private int startingGold;
+	
+	private AgentBrain agent;
 
 
 	public Screen(String theMapName, String [][] theMap) {
@@ -93,6 +94,9 @@ public class Screen extends JPanel implements KeyListener{
 	}
 
 	private void setupInitialVariables(String theMapName, String[][] theMap) {
+		agent = new AgentBrain(theMap);
+		Thread agentThread = new Thread(agent);
+		agentThread.start();
 
 		//Just in case things don't work so well with the map
 		this.setSize(10*tileSize,10*tileSize);
@@ -172,8 +176,6 @@ public class Screen extends JPanel implements KeyListener{
 		}
 
 		startingGold = gold.size();
-		
-		player.search(map);
 
 		this.setSize(cols*tileSize,rows*tileSize);
 		this.setPreferredSize(getSize());
@@ -206,17 +208,13 @@ public class Screen extends JPanel implements KeyListener{
 
 	public void move(GameObject g) {
 		AgentAction action = g.getMove();
-		if(action == null) {
-			return;
-		}
-		
 		int col = g.getColLocation();
 		int row = g.getRowLocation();
 
 		if(action == AgentAction.declareVictory) {
 			playerDeclaresVictory = true;
 		}
-		else if(action == AgentAction.pickupSomething) {
+		if(action == AgentAction.pickupSomething) {
 			for (GameObject go: gold) {
 				if((int)(go.getColLocationOnGraphics()/tileSize) == col && (int)(go.getRowLocationOnGraphics()/tileSize) == row) {
 					gold.remove(go);
@@ -230,33 +228,6 @@ public class Screen extends JPanel implements KeyListener{
 				}
 			}
 		}
-		else if(action == AgentAction.moveRight) {
-			if(isValidMove(row,col+1)) {
-				g.setColLocation(col+1);
-			}
-		}
-		else if(action == AgentAction.moveLeft) {
-			if(isValidMove(row,col-1)) {
-				g.setColLocation(col-1);
-			}
-		}
-		else if(action == AgentAction.moveUp) {
-			if(isValidMove(row-1,col)) {
-				g.setRowLocation(row-1);
-			}
-		}
-		else if(action == AgentAction.moveDown) {
-			if(isValidMove(row+1,col)) {
-				g.setRowLocation(row+1);
-			}
-		}
-		else if(action == AgentAction.doNothing) {
-
-		}
-		else {
-			System.out.println("Unhandled action " + action);
-		}
-
 		if(action.isAnAction()) {
 			numActions++;
 		}
@@ -267,6 +238,10 @@ public class Screen extends JPanel implements KeyListener{
 	@Override
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
+		
+		if(agent.isFinished()) {
+			player.setNextAgentMove(agent, this);
+		}
 		
 		if(playerDeclaresVictory) {
 			g.clearRect(0, 0, this.getWidth(), this.getHeight());
@@ -324,6 +299,7 @@ public class Screen extends JPanel implements KeyListener{
 		playerImage = findRandomImage("images\\Dungeon Crawl Stone Soup Full\\player\\draconic_head",playerImage);
 		playerImage = findRandomImage("images\\Dungeon Crawl Stone Soup Full\\player\\draconic_wing",playerImage);
 		player = new GameObject(col*tileSize,row*tileSize,playerImage,tileSize);
+
 	}
 
 	private boolean sameSquare(GameObject a, GameObject b) {
@@ -367,7 +343,7 @@ public class Screen extends JPanel implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		//System.out.println("Key pressed");
+//		System.out.println("Key pressed, please hold");
 		player.setNextMove(e,this);
 	}
 

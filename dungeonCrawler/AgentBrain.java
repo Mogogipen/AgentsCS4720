@@ -1,45 +1,33 @@
 package dungeonCrawler;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
 
-public class AgentBrain {
-
-	private Queue<AgentAction> nextMoves;
+public class AgentBrain implements Runnable {
 	
 	private HashMap<String, Boolean> stateHash;
-	private boolean finished;
+	private LinkedList<AgentAction> actionQueue;
 	private State map;
-
-	public AgentBrain() {
-		nextMoves = new LinkedList<AgentAction>();
-	}
 	
-	public void addNextMove(AgentAction nextMove) {
-		this.nextMoves.add(nextMove);
-	}
-
-	public void clearAllMoves() {
-		nextMoves = new LinkedList<AgentAction>();
-	}
-
-	public AgentAction getNextMove() {
-		if(nextMoves.isEmpty()) {
-			return AgentAction.doNothing;
-		}
-		return nextMoves.remove();
-	}
+	private Boolean finished;
 	
-	
-	public void search(String [][] theMap) {
+	AgentBrain(String[][] m) {
+		map = new State(m);
+		stateHash = new HashMap<String, Boolean>();
+		actionQueue = new LinkedList<AgentAction>();
 		finished = false;
-		map = new State(theMap);
-		
-		BFS();
-//		DFS();
+	}
+	
+	public AgentAction nextAction() {
+		if (finished && !actionQueue.isEmpty()) {
+			return actionQueue.pop();
+		}
+		return AgentAction.doNothing;
+	}
+	
+	public boolean isFinished() {
+		return finished;
 	}
 	
 	private void BFS() {
@@ -61,7 +49,7 @@ public class AgentBrain {
 		stateSpace = stateSpace.multiply(goldPower);
 		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
 			System.out.printf("Possible state space too large: %,d\n", stateSpace);
-			nextMoves.add(AgentAction.declareVictory);
+			actionQueue.add(AgentAction.declareVictory);
 			return;
 		}
 		
@@ -99,8 +87,8 @@ public class AgentBrain {
 			// Get the next node in the queue
 			currentState = searchQueue.pop();
 		}
-		nextMoves = currentState.getActions();
-		nextMoves.add(AgentAction.declareVictory);
+		actionQueue = currentState.getActions();
+		actionQueue.add(AgentAction.declareVictory);
 	}
 	
 	private void DFS() {
@@ -116,8 +104,8 @@ public class AgentBrain {
 		// Check if current node is goal state, then return
 		if (currentState.isGoalState()) {
 			finished = true;
-			nextMoves = currentState.getActions();
-			nextMoves.add(AgentAction.declareVictory);
+			actionQueue = currentState.getActions();
+			actionQueue.add(AgentAction.declareVictory);
 			return;
 		}
 		
@@ -148,5 +136,29 @@ public class AgentBrain {
 		return;
 	}
 	
-	
+	private void UCS() {
+		
+	}
+
+	@Override
+	public void run() {
+		long start = System.nanoTime();
+		
+		// Run the appropriate algorithm
+//		BFS();
+//		DFS();
+		UCS();
+		
+		// Print agent metrics to the console
+		long stop = System.nanoTime();
+		double timeTaken = (double)(stop-start)/1000000000;
+		System.out.printf("Time taken: %.3f seconds\n", (timeTaken));
+		
+		System.out.printf("HashMap size: %,d\n", stateHash.size());
+		
+		System.out.printf("Actions: %d\n", actionQueue.size()-1);
+		
+		return;
+	}
+
 }

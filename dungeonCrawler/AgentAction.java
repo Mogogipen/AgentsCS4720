@@ -1,7 +1,6 @@
 package dungeonCrawler;
 
 public class AgentAction {
-	
 	public static final AgentAction moveLeft = new AgentAction(true);
 	public static final AgentAction moveRight = new AgentAction(true);
 	public static final AgentAction moveUp = new AgentAction(true);
@@ -23,29 +22,23 @@ public class AgentAction {
 		return isAnAction;
 	}
 	
+	//Temp
 	@Override
 	public String toString() {
-		if(this == moveLeft) {
-			return "Move Left";
-		}
-		else if(this == moveRight) {
-			return "Move Right";
-		}
-		else if(this == moveUp) {
-			return "Move Up";
-		}
-		else if(this == moveDown) {
-			return "Move Down";
-		}
-		else if(this == pickupSomething) {
-			return "Pickup Something";
-		}
-		else if(this == declareVictory) {
-			return "Declare Victory";
-		}
-		else if(this == doNothing) {
-			return "Do Nothing";
-		}
-		return null;
+		if(this == moveLeft)
+			return "left";
+		if(this == moveRight)
+			return "right";
+		if(this == moveUp)
+			return "up";
+		if(this == moveDown)
+			return "down";
+		if(this == pickupSomething)
+			return "pickup";
+		if(this == declareVictory)
+			return "victory";
+		if(this == doNothing)
+			return "noop";
+		return "fail";
 	}
 }
