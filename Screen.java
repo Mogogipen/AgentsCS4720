@@ -47,7 +47,7 @@ public class Screen extends JPanel implements KeyListener{
 	private String mapName;
 	private int startingGold;
 	
-	private Agent agent;
+	private AgentBrain agent;
 
 
 	public Screen(String theMapName, String [][] theMap) {
@@ -93,22 +93,7 @@ public class Screen extends JPanel implements KeyListener{
 	}
 
 	private void setupInitialVariables(String theMapName, String[][] theMap) {
-		
-		//Start the agent with user input
-		Scanner agentQuery = new Scanner(System.in);
-		System.out.println("Please enter search method (BFS or DFS): ");
-		String searchType = agentQuery.nextLine();
-		agentQuery.close();
-		Search type;
-		if (searchType.toUpperCase().equals("BFS"))
-			type = Search.BFS;
-		else if (searchType.toUpperCase().equals("DFS"))
-			type = Search.DFS;
-		else {
-			System.out.println("Invalid search, agent deactivated.");
-			type = null;
-		}
-		agent = new Agent(theMap, type);
+		agent = new AgentBrain(theMap);
 		Thread agentThread = new Thread(agent);
 		agentThread.start();
 

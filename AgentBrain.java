@@ -3,18 +3,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class Agent implements Runnable {
+public class AgentBrain implements Runnable {
 	
 	private HashMap<String, Boolean> stateHash;
 	private LinkedList<AgentAction> actionQueue;
 	private State map;
 	
 	private Boolean finished;
-	private Search type;
 	
-	Agent(String[][] m, Search t) {
+	AgentBrain(String[][] m) {
 		map = new State(m);
-		type = t;
 		stateHash = new HashMap<String, Boolean>();
 		actionQueue = new LinkedList<AgentAction>();
 		finished = false;
@@ -136,20 +134,19 @@ public class Agent implements Runnable {
 		}
 		return;
 	}
+	
+	private void UCS() {
+		
+	}
 
 	@Override
 	public void run() {
 		long start = System.nanoTime();
 		
 		// Run the appropriate algorithm
-		if (type == null)
-			return;
-		if (type == Search.BFS)
-			BFS();
-		else if (type == Search.DFS)
-			DFS();
-		else
-			System.out.println("Search parameter failure");
+//		BFS();
+//		DFS();
+		UCS();
 		
 		// Print agent metrics to the console
 		long stop = System.nanoTime();
@@ -163,9 +160,4 @@ public class Agent implements Runnable {
 		return;
 	}
 
-}
-
-enum Search {
-	BFS,
-	DFS
 }

@@ -158,7 +158,7 @@ public class GameObject {
 		
 	}
 	
-	public void setNextAgentMove(Agent a, Screen s) {
+	public void setNextAgentMove(AgentBrain a, Screen s) {
 		AgentAction proposedAction = a.nextAction();
 		//		System.out.println("Key Event " + keyEventCode);
 
