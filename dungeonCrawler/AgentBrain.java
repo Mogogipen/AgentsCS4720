@@ -3,6 +3,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 
 public class AgentBrain implements Runnable {
 	
@@ -137,7 +138,43 @@ public class AgentBrain implements Runnable {
 	}
 	
 	private void UCS() {
-		
+		PriorityQueue<State> searchQueue = new PriorityQueue<State>();
+		State currentState = new State(map);
+		while(!finished) {
+			// Check if current node is goal state, then break
+			if (currentState.isGoalState()) {
+				finished = true;
+				break;
+			}
+			
+			// Add new nodes to queue
+			State pickUpTest = currentState.pickUp();
+			if (pickUpTest != null) {
+				stateHash.put(pickUpTest.toHash(), true);
+				searchQueue.add(pickUpTest);
+			} else {
+				ArrayList<State> newState = new ArrayList<State>();
+				newState.add(currentState.moveDown());
+				newState.add(currentState.moveUp());
+				newState.add(currentState.moveRight());
+				newState.add(currentState.moveLeft());
+				for (State s : newState) {
+					if (s != null) {
+						String hash = s.toHash();
+						if (!stateHash.containsKey(hash) ) {
+							s.setDistance();
+							stateHash.put(hash, true);
+							searchQueue.add(s);
+						}
+					}
+				}
+			}
+			
+			// Get the next node in the queue
+			currentState = searchQueue.remove();
+		}
+		actionQueue = currentState.getActions();
+		actionQueue.add(AgentAction.declareVictory);
 	}
 
 	@Override
