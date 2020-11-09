@@ -12,12 +12,16 @@ public class AgentBrain implements Runnable {
 	private State map;
 	
 	private Boolean finished;
+	private long startTime;
+	private long tenSeconds;
 	
 	AgentBrain(String[][] m) {
 		map = new State(m);
 		stateHash = new HashMap<String, Boolean>();
 		actionQueue = new LinkedList<AgentAction>();
 		finished = false;
+		long oneSecond = 1000000000;
+		tenSeconds = 10 * oneSecond;
 	}
 	
 	public AgentAction nextAction() {
@@ -34,31 +38,39 @@ public class AgentBrain implements Runnable {
 	private void BFS() {
 		
 		// If the state space is too large, cancel
-		String m = map.toHash();
-		BigInteger stateSpace = BigInteger.ZERO;
-		int gold = 0;
-		for (int i = 0; i < m.length(); i++) {
-			if (m.charAt(i) == '.') {
-				gold++;
-				stateSpace = stateSpace.add(BigInteger.ONE);
-			}
-			if (m.charAt(i) == ' ')
-				stateSpace = stateSpace.add(BigInteger.ONE);
-		}
-		BigInteger goldPower = new BigInteger("2");
-		goldPower = goldPower.pow(gold);
-		stateSpace = stateSpace.multiply(goldPower);
-		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
-			System.out.printf("Possible state space too large: %,d\n", stateSpace);
-			actionQueue.add(AgentAction.declareVictory);
-			return;
-		}
+//		String m = map.toHash();
+//		BigInteger stateSpace = BigInteger.ZERO;
+//		int gold = 0;
+//		for (int i = 0; i < m.length(); i++) {
+//			if (m.charAt(i) == '.') {
+//				gold++;
+//				stateSpace = stateSpace.add(BigInteger.ONE);
+//			}
+//			if (m.charAt(i) == ' ')
+//				stateSpace = stateSpace.add(BigInteger.ONE);
+//		}
+//		BigInteger goldPower = new BigInteger("2");
+//		goldPower = goldPower.pow(gold);
+//		stateSpace = stateSpace.multiply(goldPower);
+//		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
+//			System.out.printf("Possible state space too large: %,d\n", stateSpace);
+//			actionQueue.add(AgentAction.declareVictory);
+//			return;
+//		}
 		
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map);
 		while(!finished) {
 			// Check if current node is goal state, then break
 			if (currentState.isGoalState()) {
+				finished = true;
+				break;
+			}
+			
+			// Stop if the process is taking longer than 10 seconds.
+			long timeTaken = System.nanoTime() - startTime;
+			if (timeTaken > tenSeconds) {
+				System.out.println("Took too long, space too large.");
 				finished = true;
 				break;
 			}
@@ -147,6 +159,13 @@ public class AgentBrain implements Runnable {
 				break;
 			}
 			
+			// Stop if the process is taking longer than 10 seconds
+			long timeTaken = System.nanoTime() - startTime;
+			if (timeTaken > tenSeconds) {
+				System.out.println("Took too long, space too large.");
+				break;
+			}
+			
 			// Add new nodes to queue
 			State pickUpTest = currentState.pickUp();
 			if (pickUpTest != null) {
@@ -180,6 +199,7 @@ public class AgentBrain implements Runnable {
 	@Override
 	public void run() {
 		long start = System.nanoTime();
+		startTime = start;
 		
 		// Run the appropriate algorithm
 //		BFS();

@@ -110,7 +110,7 @@ public class MyGui extends JFrame{
 	public static void main(String [] args){
 		//loadAllFiles();
 		//new MyGui();
-		new MyGui(new File("DungeonLayouts\\smallSearch.txt"));
+		new MyGui(new File("DungeonLayouts\\oddSearch.txt"));
 		
 		/*
 		testSearch
@@ -119,14 +119,15 @@ public class MyGui extends JFrame{
 		greedySearch
 		smallSafeSearch
 		smallSearch
+		mediumSafeSearch
+		trickySearch
+		
 		openSearch
 		boxSearch
-		mediumSafeSearch
 		mediumSearch
 		bigSafeSearch
 		bigSearch
 		oddSearch
-		trickySearch
 		*/
 		
 //		String[]vacuumWorld =
