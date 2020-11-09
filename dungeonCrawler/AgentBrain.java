@@ -162,6 +162,7 @@ public class AgentBrain implements Runnable {
 			// Stop if the process is taking longer than 10 seconds
 			long timeTaken = System.nanoTime() - startTime;
 			if (timeTaken > tenSeconds) {
+				finished = true;
 				System.out.println("Took too long, space too large.");
 				break;
 			}
