@@ -115,9 +115,9 @@ public class State implements Comparable<State> {
 	@Override
 	public int compareTo(State s) {
 		if (this.distance > s.distance)
-			return -1;
-		else if (this.distance < s.distance)
 			return 1;
+		else if (this.distance < s.distance)
+			return -1;
 		return 0;
 	}
 	
