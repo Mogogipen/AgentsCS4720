@@ -14,6 +14,7 @@ public class AgentBrain implements Runnable {
 	private Boolean finished;
 	private long startTime;
 	private long tenSeconds;
+	private int nodesVisited;
 	
 	AgentBrain(String[][] m) {
 		map = new State(m);
@@ -22,6 +23,7 @@ public class AgentBrain implements Runnable {
 		finished = false;
 		long oneSecond = 1000000000;
 		tenSeconds = 10 * oneSecond;
+		nodesVisited = 0;
 	}
 	
 	public AgentAction nextAction() {
@@ -61,6 +63,7 @@ public class AgentBrain implements Runnable {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map);
 		while(!finished) {
+			nodesVisited++;
 			// Check if current node is goal state, then break
 			if (currentState.isGoalState()) {
 				finished = true;
@@ -110,6 +113,7 @@ public class AgentBrain implements Runnable {
 	}
 	
 	private void DFS(State currentState) {
+		nodesVisited++;
 		// Hash
 		String hash = currentState.toHash();
 		stateHash.put(hash, true);
@@ -153,6 +157,7 @@ public class AgentBrain implements Runnable {
 		PriorityQueue<State> searchQueue = new PriorityQueue<State>();
 		State currentState = new State(map);
 		while(!finished) {
+			nodesVisited++;
 			// Check if current node is goal state, then break
 			if (currentState.isGoalState()) {
 				finished = true;
@@ -210,10 +215,10 @@ public class AgentBrain implements Runnable {
 		// Print agent metrics to the console
 		long stop = System.nanoTime();
 		double timeTaken = (double)(stop-start)/1000000000;
-		System.out.printf("Time taken: %.3f seconds\n", (timeTaken));
+		System.out.printf("Time taken: %.3f seconds\n\n", (timeTaken));
 		
-		System.out.printf("HashMap size: %,d\n", stateHash.size());
-		
+		System.out.printf("Nodes Visited: %,d\n", nodesVisited);
+		System.out.printf("Nodes Created: %,d\n", stateHash.size());
 		System.out.printf("Actions: %d\n", actionQueue.size()-1);
 		
 		return;
