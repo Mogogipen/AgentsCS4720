@@ -39,27 +39,6 @@ public class AgentBrain implements Runnable {
 	
 	private void BFS() {
 		
-		// If the state space is too large, cancel
-//		String m = map.toHash();
-//		BigInteger stateSpace = BigInteger.ZERO;
-//		int gold = 0;
-//		for (int i = 0; i < m.length(); i++) {
-//			if (m.charAt(i) == '.') {
-//				gold++;
-//				stateSpace = stateSpace.add(BigInteger.ONE);
-//			}
-//			if (m.charAt(i) == ' ')
-//				stateSpace = stateSpace.add(BigInteger.ONE);
-//		}
-//		BigInteger goldPower = new BigInteger("2");
-//		goldPower = goldPower.pow(gold);
-//		stateSpace = stateSpace.multiply(goldPower);
-//		if (stateSpace.compareTo(BigInteger.TEN.pow(6)) == 1) {
-//			System.out.printf("Possible state space too large: %,d\n", stateSpace);
-//			actionQueue.add(AgentAction.declareVictory);
-//			return;
-//		}
-		
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map);
 		while(!finished) {
@@ -154,8 +133,16 @@ public class AgentBrain implements Runnable {
 	}
 	
 	private void UCS() {
+		UCS(false);
+	}
+	
+	private void UCS(boolean aStar) {
 		PriorityQueue<State> searchQueue = new PriorityQueue<State>();
 		State currentState = new State(map);
+		
+		if (aStar)
+			currentState.aStarComparable();
+		
 		while(!finished) {
 			nodesVisited++;
 			// Check if current node is goal state, then break
@@ -193,6 +180,10 @@ public class AgentBrain implements Runnable {
 		actionQueue = currentState.getActions();
 		actionQueue.add(AgentAction.declareVictory);
 	}
+	
+	private void AS() {
+		UCS(true);
+	}
 
 	@Override
 	public void run() {
@@ -202,7 +193,8 @@ public class AgentBrain implements Runnable {
 		// Run the appropriate algorithm
 //		BFS();
 //		DFS();
-		UCS();
+//		UCS();
+		AS();
 		
 		// Print agent metrics to the console
 		long stop = System.nanoTime();

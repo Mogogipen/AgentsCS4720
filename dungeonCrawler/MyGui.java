@@ -110,7 +110,7 @@ public class MyGui extends JFrame{
 	public static void main(String [] args){
 		//loadAllFiles();
 		//new MyGui();
-		new MyGui(new File("DungeonLayouts\\mediumSafeSearch.txt"));
+		new MyGui(new File("DungeonLayouts\\boxSearch.txt"));
 		
 		/*
 		testSearch

@@ -8,6 +8,7 @@ public class State implements Comparable<State> {
 	private LinkedList<AgentAction> actionsToCurrentState;
 	
 	private int distance;
+	private boolean aStar;
 	
 	//
 	// Constructors
@@ -26,6 +27,7 @@ public class State implements Comparable<State> {
 			}
 		}
 		actionsToCurrentState = new LinkedList<AgentAction>();
+		aStar = false;
 	}
 	
 	State(State s) {
@@ -38,6 +40,7 @@ public class State implements Comparable<State> {
 		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
 		xPos = s.xPos;
 		yPos = s.yPos;
+		aStar = s.aStar;
 	}
 	
 	private State(State s, int x, int y, AgentAction a) {
@@ -109,8 +112,13 @@ public class State implements Comparable<State> {
 		return actionsToCurrentState;
 	}
 	
+	public void aStarComparable() {
+		aStar = true;
+	}
+	
 	//
-	// For use with uniform cost search (comparability)
+	// For use with uniform cost search and A* (comparability)
+	//
 
 	@Override
 	public int compareTo(State s) {
@@ -118,6 +126,12 @@ public class State implements Comparable<State> {
 			return 1;
 		else if (this.distance < s.distance)
 			return -1;
+		if (aStar) {
+			if (this.actionsToCurrentState.size() > s.actionsToCurrentState.size())
+				return 1;
+			else if (this.actionsToCurrentState.size() < s.actionsToCurrentState.size())
+				return -1;
+		}
 		return 0;
 	}
 	
