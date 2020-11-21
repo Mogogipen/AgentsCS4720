@@ -201,9 +201,9 @@ public class AgentBrain implements Runnable {
 		double timeTaken = (double)(stop-start)/1000000000;
 		System.out.printf("Time taken: %.3f seconds\n\n", (timeTaken));
 		
+		System.out.printf("Actions: %d\n", actionQueue.size()-1);
 		System.out.printf("Nodes Visited: %,d\n", nodesVisited);
 		System.out.printf("Nodes Created: %,d\n", stateHash.size());
-		System.out.printf("Actions: %d\n", actionQueue.size()-1);
 		
 		return;
 	}
