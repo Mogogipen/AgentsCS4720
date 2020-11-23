@@ -262,13 +262,13 @@ public class Screen extends JPanel implements KeyListener{
 		playerY = 1;
 
 		//Cheater code
-		playerX = (int)(Math.random()*(fullMap.length-2))+1;
-		playerY = (int)(Math.random()*(fullMap.length-2))+1;
-		for(int i = 0; i < fullMap.length; i++) {
-			for(int j = 0; j < fullMap[i].length; j++) {
-				makeThingsVisableAtThisLocation(i,j);
-			}
-		}
+//		playerX = (int)(Math.random()*(fullMap.length-2))+1;
+//		playerY = (int)(Math.random()*(fullMap.length-2))+1;
+//		for(int i = 0; i < fullMap.length; i++) {
+//			for(int j = 0; j < fullMap[i].length; j++) {
+//				makeThingsVisableAtThisLocation(i,j);
+//			}
+//		}
 
 		fullMap[playerX][playerY].setPlayer(true);
 

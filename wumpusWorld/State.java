@@ -18,7 +18,10 @@ public class State implements Comparable<State> {
 		map = new GameTile[m.length][m[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				map[i][j] = new GameTile(m[i][j]);
+				if (m[i][j] == null)
+					map[i][j] = null;
+				else
+					map[i][j] = new GameTile(m[i][j]);
 			}
 		}
 		xPos = x;
@@ -85,7 +88,7 @@ public class State implements Comparable<State> {
 	
 	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
 	public boolean canMoveTo(GameTile t) {
-		return !(t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
+		return !(t == null || t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
 	}
 	
 	//
