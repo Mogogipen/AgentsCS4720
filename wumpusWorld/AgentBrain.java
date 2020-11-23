@@ -39,7 +39,7 @@ public class AgentBrain {
 	}
 	
 	//For wumpus world, we do one move at a time
-	public AgentAction getNextMove(GameTile [][] visibleMap, int xPos, int yPos) {
+	public AgentAction getNextMove(GameTile [][] visibleMap) {
 
 		//Ideally you would remove all this code, but I left it in so the keylistener would work
 		if(keyboardPlayOnly) {
@@ -56,16 +56,23 @@ public class AgentBrain {
 		
 		// My code runs if the keyboard play is set to false
 		else {
+			// Find the player each time
+			int[] pos = new int[2];
+			pos = findPlayer(visibleMap);
+			
 			// First assignment: find the exit (hasGold is set to true)
 			if (hasGold && !foundExit)
-				findExitPath(visibleMap, xPos, yPos);
+				findExitPath(visibleMap, pos[0], pos[1]);
+			
 			if (!actionQueue.isEmpty())
 				return actionQueue.pop();
+			
 			return AgentAction.doNothing; 
 		}
 	}
 
 	// Using breadth first search, find the shortest path to the exit
+	// TODO Change name, and add goal parameter
 	private void findExitPath(GameTile[][] map, int xPos, int yPos) {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map, xPos, yPos);
@@ -118,6 +125,19 @@ public class AgentBrain {
 		if (numGamesPlayed >= 10)
 			actionQueue.add(AgentAction.quit);
 		else actionQueue.add(AgentAction.declareVictory);
+	}
+	
+	private int[] findPlayer(GameTile[][] visibleMap) {
+		int[] result = new int[2];
+		for (int i = 0; i < visibleMap.length; i++) {
+			for (int j = 0; j < visibleMap[0].length; j++) {
+				if (visibleMap[i][j].hasPlayer()) {
+					result[0] = i;
+					result[1] = j;
+				}
+			}
+		}
+		return null;
 	}
 
 
