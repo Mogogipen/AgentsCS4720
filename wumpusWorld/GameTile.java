@@ -244,6 +244,23 @@ public class GameTile {
 		}
 		return s + " ";
 	}
+	
+	public String toHashable() {
+		String s = "";
+		if(tileType == IS_GROUND){
+			s += " ";
+		}
+		else if(tileType == IS_WALL){
+			s += "#";
+		}
+		else if(tileType == IS_UNKNOWN){
+			s += "U";
+		}
+		else {
+			System.err.println("Unknown tile type " + tileType);
+		}
+		return s;
+	}
 
 	public static void setupPictures() {
 		pit = Screen.findRandomImage("images\\Dungeon Crawl Stone Soup Full\\dungeon\\traps");

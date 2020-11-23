@@ -2,7 +2,7 @@ package wumpusWorld;
 import java.util.LinkedList;
 
 public class State implements Comparable<State> {
-	private String[][] map;
+	private GameTile[][] map;
 	private int xPos;
 	private int yPos;
 	private LinkedList<AgentAction> actionsToCurrentState;
@@ -12,30 +12,26 @@ public class State implements Comparable<State> {
 	
 	//
 	// Constructors
-	// TODO Change this to accept new format
 	//
 	
-	State(String[][] m) {
-		map = new String[m.length][m[0].length];
+	State(GameTile[][] m, int x, int y) {
+		map = new GameTile[m.length][m[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				if (m[i][j].equals("S")) {
-					xPos = i;
-					yPos = j;
-					map[i][j] = " ";
-				} else
-					map[i][j] = new String(m[i][j]);
+				map[i][j] = new GameTile(m[i][j]);
 			}
 		}
+		xPos = x;
+		yPos = y;
 		actionsToCurrentState = new LinkedList<AgentAction>();
 		aStar = false;
 	}
 	
 	State(State s) {
-		map = new String[s.map.length][s.map[0].length];
+		map = new GameTile[s.map.length][s.map[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				map[i][j] = new String(s.map[i][j]);
+				map[i][j] = new GameTile(s.map[i][j]);
 			}
 		}
 		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
@@ -53,75 +49,85 @@ public class State implements Comparable<State> {
 	
 	//
 	// Movement
-	// TODO Change everything to work with the new map format.
 	//
 	
 	public State moveUp() {
-		if (map[xPos][yPos+1].equals("w")) {
+		if (!canMoveTo(map[xPos][yPos+1])) {
 			return null;
 		}
 		return new State(this, xPos, yPos+1, AgentAction.moveRight);
 	}
 	public State moveDown() {
-		if (map[xPos][yPos-1].equals("w"))
+		if (!canMoveTo(map[xPos][yPos-1]))
 			return null;
 		return new State(this, xPos, yPos-1, AgentAction.moveLeft);
 	}
 	public State moveLeft() {
-		if (map[xPos-1][yPos].equals("w"))
+		if (!canMoveTo(map[xPos-1][yPos]))
 			return null;
 		return new State(this, xPos-1, yPos, AgentAction.moveUp);
 	}
 	public State moveRight() {
-		if (map[xPos+1][yPos].equals("w"))
+		if (!canMoveTo(map[xPos+1][yPos]))
 			return null;
 		return new State(this, xPos+1, yPos, AgentAction.moveDown);
 	}
 	public State pickUp() {
-		if (map[xPos][yPos].equals(".")) {
+		if (map[xPos][yPos].hasGlitter()) {
 			State result = new State(this, xPos, yPos, AgentAction.pickupSomething);
-			result.map[xPos][yPos] = " ";
+			result.map[xPos][yPos].setGlitter(false);
 			return result;
 		}
 		return null;
 	}
 	
+	//TODO Add new actions
+	
+	public boolean canMoveTo(GameTile t) {
+		return !(t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
+	}
+	
 	//
 	// Miscellaneous
-	// TODO Change to accept new format
 	//
 	
 	public String toHash() {
 		String result = String.format("%2d%2d", xPos, yPos);
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				result += map[i][j];
+				result += map[i][j].toHashable();
 			}
 		}
 		return result;
 	}
 	
-	public boolean isGoalState() {
+	public boolean hasGold() {
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j].equals("."))
+				if (map[i][j].hasGlitter())
 					return false;
 			}
 		}
 		return true;
 	}
 	
-	public LinkedList<AgentAction> getActions() {
-		return actionsToCurrentState;
+	public boolean atExit() {
+		if (xPos == map.length-2 && yPos == 1)
+			return true;
+		return false;
 	}
 	
-	public void aStarComparable() {
-		aStar = true;
+	public LinkedList<AgentAction> getActions() {
+		return actionsToCurrentState;
 	}
 	
 	//
 	// For use with uniform cost search and A* (comparability)
 	//
+	
+	public void aStarComparable() {
+		aStar = true;
+	}
 
 	@Override
 	public int compareTo(State s) {
@@ -142,7 +148,7 @@ public class State implements Comparable<State> {
 		distance = 0;
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j].equals("."))
+				if (map[i][j].hasGlitter())
 					distance += 2;
 				if (i == xPos && j == yPos)
 					distance--;

@@ -21,7 +21,7 @@ public class Screen extends JPanel implements KeyListener{
 	private static final long serialVersionUID = 1L;
 	public static final int tileSize = 64;
 
-	public static final int SLEEP_TIME = 150;
+	public static final int SLEEP_TIME = 500;
 
 	private GameTile [][] fullMap;
 	private GameTile [][] visableMap;
@@ -355,7 +355,7 @@ public class Screen extends JPanel implements KeyListener{
 	}
 
 	private void move() {
-		AgentAction action = brain.getNextMove(visableMap);
+		AgentAction action = brain.getNextMove(visableMap, playerX, playerY);
 		if(action == null) {
 			return;
 		}
