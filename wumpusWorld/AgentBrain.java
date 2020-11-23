@@ -37,6 +37,7 @@ public class AgentBrain {
 			nextMove = m;
 		}
 	}
+	
 	//For wumpus world, we do one move at a time
 	public AgentAction getNextMove(GameTile [][] visibleMap, int xPos, int yPos) {
 
@@ -55,28 +56,16 @@ public class AgentBrain {
 		
 		// My code runs if the keyboard play is set to false
 		else {
-			// Play 20 "games" and then quits
-			if(numGamesPlayed >= 20) {
-				return AgentAction.quit;
-			}
-			
 			// First assignment: find the exit (hasGold is set to true)
 			if (hasGold && !foundExit)
 				findExitPath(visibleMap, xPos, yPos);
-
-			// Search for the exit once the gold is found
-			if (foundExit) {
-				if (actionQueue.isEmpty())
-					return AgentAction.doNothing;
+			if (!actionQueue.isEmpty())
 				return actionQueue.pop();
-			} else if (hasGold) {
-				findExitPath(visibleMap, xPos, yPos);
-			}
-			
-			return AgentAction.quit; 
+			return AgentAction.doNothing; 
 		}
 	}
 
+	// Using breadth first search, find the shortest path to the exit
 	private void findExitPath(GameTile[][] map, int xPos, int yPos) {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map, xPos, yPos);
@@ -124,7 +113,11 @@ public class AgentBrain {
 			currentState = searchQueue.pop();
 		}
 		actionQueue = currentState.getActions();
-		actionQueue.add(AgentAction.declareVictory);
+		
+		// After 10 games, the agent quits rather than declares victory
+		if (numGamesPlayed >= 10)
+			actionQueue.add(AgentAction.quit);
+		else actionQueue.add(AgentAction.declareVictory);
 	}
 
 

@@ -83,6 +83,7 @@ public class State implements Comparable<State> {
 	
 	//TODO Add new actions
 	
+	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
 	public boolean canMoveTo(GameTile t) {
 		return !(t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
 	}
