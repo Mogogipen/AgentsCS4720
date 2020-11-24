@@ -137,7 +137,7 @@ public class AgentBrain {
 				}
 			}
 		}
-		return null;
+		return result;
 	}
 
 
