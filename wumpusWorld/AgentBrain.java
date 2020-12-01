@@ -64,8 +64,10 @@ public class AgentBrain {
 			if (hasGold && !foundExit)
 				findExitPath(visibleMap, pos[0], pos[1]);
 			
-			if (!actionQueue.isEmpty())
+			if (!actionQueue.isEmpty()) {
+				currentNumMoves++;
 				return actionQueue.pop();
+			}
 			
 			return AgentAction.doNothing; 
 		}
