@@ -19,7 +19,12 @@ public class AgentBrain {
 	//My Variables
 	private LinkedList<AgentAction> actionQueue;
 	private boolean hasGold = true; //TODO Temp value, change to dynamic in the future
+	private boolean shotArrow = false;
 	private boolean foundExit = false;
+	
+	private final int FINDWUMPUS = 1;
+	private final int FINDEXIT = 2;
+	private final int FINDGOLD = 3;
 
 	public AgentBrain() {
 		nextMove = null;
@@ -60,9 +65,14 @@ public class AgentBrain {
 			int[] pos = new int[2];
 			pos = findPlayer(visibleMap);
 			
+			// Second assignment: find the wumpus
+			if (!shotArrow) {
+				BFS(visibleMap, pos[0], pos[1], FINDWUMPUS);
+			}
+			
 			// First assignment: find the exit (hasGold is set to true)
-			if (hasGold && !foundExit)
-				findExitPath(visibleMap, pos[0], pos[1]);
+			if (shotArrow && hasGold && !foundExit)
+				BFS(visibleMap, pos[0], pos[1], FINDEXIT);
 			
 			if (!actionQueue.isEmpty()) {
 				currentNumMoves++;
@@ -75,17 +85,35 @@ public class AgentBrain {
 
 	// Using breadth first search, find the shortest path to the exit
 	// TODO Change name, and add goal parameter
-	private void findExitPath(GameTile[][] map, int xPos, int yPos) {
+	private void BFS(GameTile[][] map, int xPos, int yPos, int find) {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map, xPos, yPos);
 		
 		HashMap<String, Boolean> stateHash = new HashMap<String, Boolean>();
 		
-		while(!foundExit) {
+		boolean goalReached = false;
+		
+		while(!goalReached) {
 			// Check if current node is goal state, then break
-			if (currentState.atExit()) {
-				foundExit = true;
-				break;
+			switch (find) {
+				case FINDEXIT:
+					if (currentState.atExit()) {
+						foundExit = true;
+						goalReached = true;
+						break;
+					}
+				case FINDWUMPUS:
+					if (currentState.canShootWumpus()) {
+						shotArrow = true;
+						goalReached = true;
+						break;
+					}
+				case FINDGOLD:
+					if (currentState.hasGold()) {
+						hasGold = true;
+						goalReached = true;
+						break;
+					}
 			}
 			
 			// Add new nodes to queue

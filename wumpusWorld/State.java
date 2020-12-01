@@ -83,6 +83,32 @@ public class State implements Comparable<State> {
 		}
 		return null;
 	}
+	public State shootUp() {
+		int[] wumpusPos = new int[2];
+		for (int i = yPos-1; i > 0; i--) {
+			if (map[xPos][i].isWall())
+				break;
+			if (map[xPos][i].hasWumpus()) {
+				wumpusPos[0] = xPos;
+				wumpusPos[1] = yPos;
+			}
+		}
+		if (wumpusPos[0] != 0) {
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowNorth);
+			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
+			return result;
+		}
+		return new State(this, xPos, yPos, AgentAction.shootArrowNorth);
+	}
+	public State shootDown() {
+		return null;
+	}
+	public State shootRight() {
+		return null;
+	}
+	public State shootLeft() {
+		return null;
+	}
 	
 	//TODO Add new actions
 	
@@ -105,7 +131,14 @@ public class State implements Comparable<State> {
 		return result;
 	}
 	
-	//TODO Add canShootWumpus()
+	//Returns a direction to shoot (1: up, 2: right, 3: down, 4: left)
+	public boolean canShootWumpus() {
+		for (int i = 1; i < map.length-1; i++) {
+			if (map[i][yPos].hasWumpus() || map[xPos][i].hasWumpus())
+				return true;
+		}
+		return false;
+	}
 	
 	public boolean hasGold() {
 		for (int i = 0; i < map.length; i++) {
