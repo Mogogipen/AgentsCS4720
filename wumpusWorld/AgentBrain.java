@@ -18,7 +18,7 @@ public class AgentBrain {
 	
 	//My Variables
 	private LinkedList<AgentAction> actionQueue;
-	private boolean hasGold = true; //TODO Temp value, change to false in the future
+	private boolean hasGold = false; //TODO Temp value, change to false in the future
 	private boolean shotArrow = false;
 	private boolean foundExit = false;
 	private boolean inProgress = false;
@@ -96,8 +96,7 @@ public class AgentBrain {
 		}
 	}
 
-	// Using breadth first search, find the shortest path to the exit
-	// TODO Change name, and add goal parameter
+	// Using breadth first search, find the shortest path to the given goal
 	private void BFS(GameTile[][] map, int xPos, int yPos, int find) {
 		LinkedList<State> searchQueue = new LinkedList<State>();
 		State currentState = new State(map, xPos, yPos);
@@ -165,11 +164,13 @@ public class AgentBrain {
 			
 			// If the search queue is empty, there is no solution
 			if (searchQueue.isEmpty()) {
-				actionQueue = new LinkedList<AgentAction>();
-				actionQueue.add(AgentAction.declareVictory);
-				shotArrow = true;
-				hasGold = true;
-				foundExit = true;
+				if (!shotArrow) shotArrow = true;
+				else {
+					actionQueue = new LinkedList<AgentAction>();
+					actionQueue.add(AgentAction.declareVictory);
+					hasGold = true;
+					foundExit = true;
+				}
 				return;
 			}
 			
