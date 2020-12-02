@@ -51,9 +51,10 @@ public class State implements Comparable<State> {
 	}
 	
 	//
-	// Movement
+	// Actions
 	//
 	
+	// Movement
 	public State moveUp() {
 		if (!canMoveTo(map[xPos][yPos+1])) {
 			return null;
@@ -75,6 +76,8 @@ public class State implements Comparable<State> {
 			return null;
 		return new State(this, xPos+1, yPos, AgentAction.moveDown);
 	}
+	
+	// Pickup
 	public State pickUp() {
 		if (map[xPos][yPos].hasGlitter()) {
 			State result = new State(this, xPos, yPos, AgentAction.pickupSomething);
@@ -83,6 +86,8 @@ public class State implements Comparable<State> {
 		}
 		return null;
 	}
+	
+	// Shooting
 	public State shootUp() {
 		int[] wumpusPos = new int[2];
 		for (int i = yPos-1; i > 0; i--) {
@@ -90,7 +95,7 @@ public class State implements Comparable<State> {
 				break;
 			if (map[xPos][i].hasWumpus()) {
 				wumpusPos[0] = xPos;
-				wumpusPos[1] = yPos;
+				wumpusPos[1] = i;
 			}
 		}
 		if (wumpusPos[0] != 0) {
@@ -101,13 +106,55 @@ public class State implements Comparable<State> {
 		return new State(this, xPos, yPos, AgentAction.shootArrowNorth);
 	}
 	public State shootDown() {
-		return null;
+		int[] wumpusPos = new int[2];
+		for (int i = yPos-1; i > 0; i--) {
+			if (map[xPos][i].isWall())
+				break;
+			if (map[xPos][i].hasWumpus()) {
+				wumpusPos[0] = xPos;
+				wumpusPos[1] = i;
+			}
+		}
+		if (wumpusPos[0] != 0) {
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowSouth);
+			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
+			return result;
+		}
+		return new State(this, xPos, yPos, AgentAction.shootArrowSouth);
 	}
 	public State shootRight() {
-		return null;
+		int[] wumpusPos = new int[2];
+		for (int i = xPos+1; i < map.length; i++) {
+			if (map[i][yPos].isWall())
+				break;
+			if (map[i][yPos].hasWumpus()) {
+				wumpusPos[0] = i;
+				wumpusPos[1] = yPos;
+			}
+		}
+		if (wumpusPos[0] != 0) {
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowEast);
+			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
+			return result;
+		}
+		return new State(this, xPos, yPos, AgentAction.shootArrowEast);
 	}
 	public State shootLeft() {
-		return null;
+		int[] wumpusPos = new int[2];
+		for (int i = xPos-1; i > 0; i--) {
+			if (map[i][yPos].isWall())
+				break;
+			if (map[i][yPos].hasWumpus()) {
+				wumpusPos[0] = i;
+				wumpusPos[1] = yPos;
+			}
+		}
+		if (wumpusPos[0] != 0) {
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowWest);
+			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
+			return result;
+		}
+		return new State(this, xPos, yPos, AgentAction.shootArrowWest);
 	}
 	
 	//TODO Add new actions
@@ -118,26 +165,24 @@ public class State implements Comparable<State> {
 	}
 	
 	//
-	// Miscellaneous
+	// Goal state checkers
 	//
 	
-	public String toHash() {
-		String result = String.format("%2d%2d", xPos, yPos);
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[0].length; j++) {
-				result += map[i][j].toHashable();
-			}
-		}
-		return result;
-	}
-	
-	//Returns a direction to shoot (1: up, 2: right, 3: down, 4: left)
-	public boolean canShootWumpus() {
-		for (int i = 1; i < map.length-1; i++) {
-			if (map[i][yPos].hasWumpus() || map[xPos][i].hasWumpus())
-				return true;
-		}
-		return false;
+	//Returns a state where the Wumpus dies from an arrow shot (if possible)
+	public State tryArrowShot() {
+		State up = shootUp();
+		if (!up.hasWumpus())
+			return up;
+		State right = shootRight();
+		if (!right.hasWumpus())
+			return right;
+		State down = shootDown();
+		if (!down.hasWumpus())
+			return down;
+		State left = shootLeft();
+		if (!left.hasWumpus())
+			return left;
+		return null;
 	}
 	
 	public boolean hasGold() {
@@ -156,8 +201,32 @@ public class State implements Comparable<State> {
 		return false;
 	}
 	
+	//
+	// Miscellaneous
+	//
+	
+	public String toHash() {
+		String result = String.format("%2d%2d", xPos, yPos);
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+				result += map[i][j].toHashable();
+			}
+		}
+		return result;
+	}
+	
 	public LinkedList<AgentAction> getActions() {
 		return actionsToCurrentState;
+	}
+	
+	private boolean hasWumpus() {
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+				if (map[i][j].hasWumpus())
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	//

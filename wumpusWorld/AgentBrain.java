@@ -21,6 +21,7 @@ public class AgentBrain {
 	private boolean hasGold = true; //TODO Temp value, change to dynamic in the future
 	private boolean shotArrow = false;
 	private boolean foundExit = false;
+	private boolean inProgress = false;
 	
 	private final int FINDWUMPUS = 1;
 	private final int FINDEXIT = 2;
@@ -65,19 +66,28 @@ public class AgentBrain {
 			int[] pos = new int[2];
 			pos = findPlayer(visibleMap);
 			
-			// Second assignment: find the wumpus
-			if (!shotArrow) {
-				BFS(visibleMap, pos[0], pos[1], FINDWUMPUS);
+			if (!inProgress) {
+				// First assignment: find the exit (hasGold is set to true)
+				if (shotArrow && hasGold && !foundExit) {
+					BFS(visibleMap, pos[0], pos[1], FINDEXIT);
+					inProgress = true;
+				}
+				
+				// Second assignment: kill the wumpus
+				if (!shotArrow) {
+					BFS(visibleMap, pos[0], pos[1], FINDWUMPUS);
+					for (int i = 0; i < actionQueue.size(); i++) {
+						System.out.println(actionQueue.get(i).toString());
+					}
+					inProgress = true;
+				}
 			}
-			
-			// First assignment: find the exit (hasGold is set to true)
-			if (shotArrow && hasGold && !foundExit)
-				BFS(visibleMap, pos[0], pos[1], FINDEXIT);
-			
+				
 			if (!actionQueue.isEmpty()) {
 				currentNumMoves++;
 				return actionQueue.pop();
-			}
+			} else
+				inProgress = false;
 			
 			return AgentAction.doNothing; 
 		}
@@ -95,25 +105,35 @@ public class AgentBrain {
 		
 		while(!goalReached) {
 			// Check if current node is goal state, then break
-			switch (find) {
-				case FINDEXIT:
-					if (currentState.atExit()) {
-						foundExit = true;
-						goalReached = true;
-						break;
-					}
-				case FINDWUMPUS:
-					if (currentState.canShootWumpus()) {
-						shotArrow = true;
-						goalReached = true;
-						break;
-					}
-				case FINDGOLD:
-					if (currentState.hasGold()) {
-						hasGold = true;
-						goalReached = true;
-						break;
-					}
+			if (FINDEXIT == find) {
+				if (currentState.atExit()) {
+					actionQueue = currentState.getActions();
+					
+					// After 10 games, the agent quits rather than declares victory
+					if (numGamesPlayed >= 10)
+						actionQueue.add(AgentAction.quit);
+					else actionQueue.add(AgentAction.declareVictory);
+					
+					foundExit = true;
+					goalReached = true;
+					break;
+				}
+			}
+			if (FINDWUMPUS == find) {
+				State shot = currentState.tryArrowShot();
+				if (shot != null) {
+					actionQueue = shot.getActions();
+					shotArrow = true;
+					goalReached = true;
+					break;
+				}
+			}
+			if (FINDGOLD == find) {
+				if (currentState.hasGold()) {
+					hasGold = true;
+					goalReached = true;
+					break;
+				}
 			}
 			
 			// Add new nodes to queue
@@ -142,6 +162,8 @@ public class AgentBrain {
 			if (searchQueue.isEmpty()) {
 				actionQueue = new LinkedList<AgentAction>();
 				actionQueue.add(AgentAction.declareVictory);
+				shotArrow = true;
+				hasGold = true;
 				foundExit = true;
 				return;
 			}
@@ -149,12 +171,6 @@ public class AgentBrain {
 			// Get the next node in the queue
 			currentState = searchQueue.pop();
 		}
-		actionQueue = currentState.getActions();
-		
-		// After 10 games, the agent quits rather than declares victory
-		if (numGamesPlayed >= 10)
-			actionQueue.add(AgentAction.quit);
-		else actionQueue.add(AgentAction.declareVictory);
 	}
 	
 	private int[] findPlayer(GameTile[][] visibleMap) {
