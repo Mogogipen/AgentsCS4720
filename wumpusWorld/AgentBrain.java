@@ -18,12 +18,12 @@ public class AgentBrain {
 	
 	//My Variables
 	private LinkedList<AgentAction> actionQueue;
-	private boolean hasGold = true; //TODO Temp value, change to dynamic in the future
+	private boolean hasGold = true; //TODO Temp value, change to false in the future
 	private boolean shotArrow = false;
 	private boolean foundExit = false;
 	private boolean inProgress = false;
 	
-	private final int FINDWUMPUS = 1;
+	private final int KILLWUMPUS = 1;
 	private final int FINDEXIT = 2;
 	private final int FINDGOLD = 3;
 
@@ -67,15 +67,21 @@ public class AgentBrain {
 			pos = findPlayer(visibleMap);
 			
 			if (!inProgress) {
-				// First assignment: find the exit (hasGold is set to true)
+				// First assignment: find the exit
 				if (shotArrow && hasGold && !foundExit) {
 					BFS(visibleMap, pos[0], pos[1], FINDEXIT);
 					inProgress = true;
 				}
 				
+				// Third assignment: find the gold
+				if (shotArrow && !hasGold) {
+					BFS(visibleMap, pos[0], pos[1], FINDGOLD);
+					inProgress = true;
+				}
+				
 				// Second assignment: kill the Wumpus
 				if (!shotArrow) {
-					BFS(visibleMap, pos[0], pos[1], FINDWUMPUS);
+					BFS(visibleMap, pos[0], pos[1], KILLWUMPUS);
 					inProgress = true;
 				}
 			}
@@ -101,6 +107,7 @@ public class AgentBrain {
 		boolean goalReached = false;
 		
 		while(!goalReached) {
+			
 			// Check if current node is goal state, then break
 			if (FINDEXIT == find) {
 				if (currentState.atExit()) {
@@ -115,8 +122,7 @@ public class AgentBrain {
 					goalReached = true;
 					break;
 				}
-			}
-			if (FINDWUMPUS == find) {
+			} else if (KILLWUMPUS == find) {
 				State shot = currentState.tryArrowShot();
 				if (shot != null) {
 					actionQueue = shot.getActions();
@@ -124,13 +130,15 @@ public class AgentBrain {
 					goalReached = true;
 					break;
 				}
-			}
-			if (FINDGOLD == find) {
+			} else if (FINDGOLD == find) {
 				if (currentState.hasGold()) {
+					actionQueue = currentState.getActions();
 					hasGold = true;
 					goalReached = true;
 					break;
 				}
+			} else {
+				System.err.println("Invalid search goal");
 			}
 			
 			// Add new nodes to queue

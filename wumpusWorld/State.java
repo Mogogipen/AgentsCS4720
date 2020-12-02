@@ -116,7 +116,7 @@ public class State implements Comparable<State> {
 			}
 		}
 		if (wumpusPos[0] != 0) {
-			State result = new State(this, xPos, yPos, AgentAction.shootArrowEast);
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowWest);
 			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
 			return result;
 		}
