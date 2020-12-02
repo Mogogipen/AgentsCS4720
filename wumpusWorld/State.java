@@ -55,23 +55,23 @@ public class State implements Comparable<State> {
 	//
 	
 	// Movement
-	public State moveUp() {
+	public State moveRight() {
 		if (!canMoveTo(map[xPos][yPos+1])) {
 			return null;
 		}
 		return new State(this, xPos, yPos+1, AgentAction.moveRight);
 	}
-	public State moveDown() {
+	public State moveLeft() {
 		if (!canMoveTo(map[xPos][yPos-1]))
 			return null;
 		return new State(this, xPos, yPos-1, AgentAction.moveLeft);
 	}
-	public State moveLeft() {
+	public State moveUp() {
 		if (!canMoveTo(map[xPos-1][yPos]))
 			return null;
 		return new State(this, xPos-1, yPos, AgentAction.moveUp);
 	}
-	public State moveRight() {
+	public State moveDown() {
 		if (!canMoveTo(map[xPos+1][yPos]))
 			return null;
 		return new State(this, xPos+1, yPos, AgentAction.moveDown);
@@ -88,7 +88,24 @@ public class State implements Comparable<State> {
 	}
 	
 	// Shooting
-	public State shootUp() {
+	public State shootRight() {
+		int[] wumpusPos = new int[2];
+		for (int i = yPos+1; i < map.length; i++) {
+			if (map[xPos][i].isWall())
+				break;
+			if (map[xPos][i].hasWumpus()) {
+				wumpusPos[0] = xPos;
+				wumpusPos[1] = i;
+			}
+		}
+		if (wumpusPos[0] != 0) {
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowEast);
+			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
+			return result;
+		}
+		return this;
+	}
+	public State shootLeft() {
 		int[] wumpusPos = new int[2];
 		for (int i = yPos-1; i > 0; i--) {
 			if (map[xPos][i].isWall())
@@ -99,30 +116,13 @@ public class State implements Comparable<State> {
 			}
 		}
 		if (wumpusPos[0] != 0) {
-			State result = new State(this, xPos, yPos, AgentAction.shootArrowNorth);
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowEast);
 			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
 			return result;
 		}
-		return new State(this, xPos, yPos, AgentAction.shootArrowNorth);
+		return this;
 	}
 	public State shootDown() {
-		int[] wumpusPos = new int[2];
-		for (int i = yPos-1; i > 0; i--) {
-			if (map[xPos][i].isWall())
-				break;
-			if (map[xPos][i].hasWumpus()) {
-				wumpusPos[0] = xPos;
-				wumpusPos[1] = i;
-			}
-		}
-		if (wumpusPos[0] != 0) {
-			State result = new State(this, xPos, yPos, AgentAction.shootArrowSouth);
-			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
-			return result;
-		}
-		return new State(this, xPos, yPos, AgentAction.shootArrowSouth);
-	}
-	public State shootRight() {
 		int[] wumpusPos = new int[2];
 		for (int i = xPos+1; i < map.length; i++) {
 			if (map[i][yPos].isWall())
@@ -133,13 +133,13 @@ public class State implements Comparable<State> {
 			}
 		}
 		if (wumpusPos[0] != 0) {
-			State result = new State(this, xPos, yPos, AgentAction.shootArrowEast);
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowSouth);
 			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
 			return result;
 		}
-		return new State(this, xPos, yPos, AgentAction.shootArrowEast);
+		return this;
 	}
-	public State shootLeft() {
+	public State shootUp() {
 		int[] wumpusPos = new int[2];
 		for (int i = xPos-1; i > 0; i--) {
 			if (map[i][yPos].isWall())
@@ -150,11 +150,11 @@ public class State implements Comparable<State> {
 			}
 		}
 		if (wumpusPos[0] != 0) {
-			State result = new State(this, xPos, yPos, AgentAction.shootArrowWest);
+			State result = new State(this, xPos, yPos, AgentAction.shootArrowNorth);
 			result.map[wumpusPos[0]][wumpusPos[1]].setWumpus(false);
 			return result;
 		}
-		return new State(this, xPos, yPos, AgentAction.shootArrowWest);
+		return this;
 	}
 	
 	//TODO Add new actions

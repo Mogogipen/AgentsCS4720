@@ -73,12 +73,9 @@ public class AgentBrain {
 					inProgress = true;
 				}
 				
-				// Second assignment: kill the wumpus
+				// Second assignment: kill the Wumpus
 				if (!shotArrow) {
 					BFS(visibleMap, pos[0], pos[1], FINDWUMPUS);
-					for (int i = 0; i < actionQueue.size(); i++) {
-						System.out.println(actionQueue.get(i).toString());
-					}
 					inProgress = true;
 				}
 			}
