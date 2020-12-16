@@ -2,10 +2,20 @@ package wumpusWorld;
 import java.util.LinkedList;
 
 public class State implements Comparable<State> {
+	
+	enum TileState {
+		UNKNOWN,
+		KNOWN,
+		SAFE,
+		UNSAFE
+	}
+	
 	private GameTile[][] map;
-	private int xPos;
-	private int yPos;
+	public int xPos;
+	public int yPos;
 	private LinkedList<AgentAction> actionsToCurrentState;
+	
+	private static TileState[][] states;
 	
 	private int distance;
 	private boolean aStar;
@@ -28,13 +38,16 @@ public class State implements Comparable<State> {
 		yPos = y;
 		actionsToCurrentState = new LinkedList<AgentAction>();
 		aStar = false;
+		generateTileStates();
+		printTileStates();
 	}
 	
 	State(State s) {
 		map = new GameTile[s.map.length][s.map[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				map[i][j] = new GameTile(s.map[i][j]);
+				if (s.map[i][j] != null)
+					map[i][j] = new GameTile(s.map[i][j]);
 			}
 		}
 		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
@@ -77,9 +90,14 @@ public class State implements Comparable<State> {
 		return new State(this, xPos+1, yPos, AgentAction.moveDown);
 	}
 	
+	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
+	public boolean canMoveTo(GameTile t) {
+		return !(t == null || t.isWall() || t.hasWumpus() || t.hasPit());
+	}
+	
 	// Pickup
 	public State pickUp() {
-		if (map[xPos][yPos].hasGlitter()) {
+		if (map[xPos][yPos] != null && map[xPos][yPos].hasGlitter()) {
 			State result = new State(this, xPos, yPos, AgentAction.pickupSomething);
 			result.map[xPos][yPos].setGlitter(false);
 			return result;
@@ -157,13 +175,6 @@ public class State implements Comparable<State> {
 		return this;
 	}
 	
-	//TODO Add new actions
-	
-	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
-	public boolean canMoveTo(GameTile t) {
-		return !(t == null || t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
-	}
-	
 	//
 	// Goal state checkers
 	//
@@ -185,6 +196,19 @@ public class State implements Comparable<State> {
 		return null;
 	}
 	
+	// Returns direction to move (1, 2, 3, 4 map to up, right, left, down) if by a safe, unknown tile, 0 if not by safe, unknown tile
+	public int bySafeTile() {
+		if (states[xPos-1][yPos] == TileState.SAFE)
+			return 1;
+		if (states[xPos][yPos+1] == TileState.SAFE)
+			return 2;
+		if (states[xPos+1][yPos] == TileState.SAFE)
+			return 3;
+		if (states[xPos][yPos-1] == TileState.SAFE)
+			return 4;
+		return 0;
+	}
+	
 	public boolean hasGold() {
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
@@ -201,6 +225,16 @@ public class State implements Comparable<State> {
 		return false;
 	}
 	
+	private boolean hasWumpus() {
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+				if (map[i][j].hasWumpus())
+					return true;
+			}
+		}
+		return false;
+	}
+	
 	//
 	// Miscellaneous
 	//
@@ -209,7 +243,10 @@ public class State implements Comparable<State> {
 		String result = String.format("%2d%2d", xPos, yPos);
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				result += map[i][j].toHashable();
+				if (map[i][j] == null)
+					result += "U";
+				else
+					result += map[i][j].toHashable();
 			}
 		}
 		return result;
@@ -219,14 +256,48 @@ public class State implements Comparable<State> {
 		return actionsToCurrentState;
 	}
 	
-	private boolean hasWumpus() {
+	private void generateTileStates() {
+		states = new TileState[map.length][map[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j].hasWumpus())
-					return true;
+				if (map[i][j] != null) {
+					states[i][j] = TileState.KNOWN;
+					if (map[i][j].hasBreeze() || map[i][j].hasStench()) {
+						if (states[i+1][j] != TileState.KNOWN)
+							states[i+1][j] = TileState.UNSAFE;
+						if (states[i-1][j] != TileState.KNOWN)
+							states[i-1][j] = TileState.UNSAFE;
+						if (states[i][j+1] != TileState.KNOWN)
+							states[i][j+1] = TileState.UNSAFE;
+						if (states[i][j-1] != TileState.KNOWN)
+							states[i][j-1] = TileState.UNSAFE;
+					} else {
+						if (states[i+1][j] != TileState.KNOWN || states[i+1][j] != TileState.UNSAFE)
+							states[i+1][j] = TileState.SAFE;
+						if (states[i-1][j] != TileState.KNOWN || states[i-1][j] != TileState.UNSAFE)
+							states[i-1][j] = TileState.SAFE;
+						if (states[i][j+1] != TileState.KNOWN || states[i][j+1] != TileState.UNSAFE)
+							states[i][j+1] = TileState.SAFE;
+						if (states[i][j-1] != TileState.KNOWN || states[i][j-1] != TileState.UNSAFE)
+							states[i][j-1] = TileState.SAFE;
+					}
+				} else {
+					if (states[i][j] == null)
+						states[i][j] = TileState.UNKNOWN;
+				}
 			}
 		}
-		return false;
+	}
+	
+	private void printTileStates() {
+		String result = "";
+		for (TileState[] l : states) {
+			for (TileState t : l) {
+				result += t;
+			}
+			result += '\n';
+		}
+		System.out.println(result);
 	}
 	
 	//
