@@ -237,6 +237,7 @@ public class AgentBrain {
 						System.err.println("Invalid movement value (safeTile check)");
 					break;
 				}
+
 			} else {
 				System.err.println("Invalid search goal");
 			}
@@ -293,5 +294,12 @@ public class AgentBrain {
 		return result;
 	}
 
+	private boolean allVisible(GameTile[][] visibleMap) {
+		for (GameTile[] l : visibleMap)
+			for (GameTile t : l)
+				if (t == null)
+					return false;
+		return true;
+	}
 
 }
