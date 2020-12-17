@@ -196,6 +196,24 @@ public class State implements Comparable<State> {
 		return null;
 	}
 	
+	public int byWumpus() {
+		int[] wumpusPos = findWumpus();
+		if (wumpusPos != null) {
+			if (wumpusPos[0] == xPos) {
+				if (wumpusPos[1] == yPos-1)
+					return 4;
+				if (wumpusPos[1] == yPos+1)
+					return 2;
+			} else if (wumpusPos[1] == yPos) {
+				if (wumpusPos[0] == xPos-1)
+					return 3;
+				if (wumpusPos[0] == xPos+1)
+					return 1;
+			}
+		}
+		return 0;
+	}
+	
 	// Returns direction to move (1, 2, 3, 4 map to up, right, left, down) if by a safe, unknown tile, 0 if not by safe, unknown tile
 	public int bySafeTile() {
 		if (states[xPos-1][yPos] == TileState.SAFE)
@@ -207,6 +225,14 @@ public class State implements Comparable<State> {
 		if (states[xPos][yPos-1] == TileState.SAFE)
 			return 4;
 		return 0;
+	}
+	
+	public boolean hasSafeTile() {
+		for (int i = 0; i < states.length; i++)
+			for (int j = 0; j < states[0].length; j++)
+				if (states[i][j] == TileState.SAFE)
+					return true;
+		return false;
 	}
 	
 	public boolean hasGold() {
@@ -256,29 +282,56 @@ public class State implements Comparable<State> {
 		return actionsToCurrentState;
 	}
 	
+	private int[] findWumpus() {
+		int[] result = null;
+		int mostStench = 0;
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+				if (map[i][j] != null) continue;
+				int stenchCount = 0;
+				if (map[i+1][j] != null && map[i+1][j].hasStench())
+					stenchCount++;
+				if (map[i-1][j] != null && map[i-1][j].hasStench())
+					stenchCount++;
+				if (map[i][j+1] != null && map[i][j+1].hasStench())
+					stenchCount++;
+				if (map[i][j-1] != null && map[i][j-1].hasStench())
+					stenchCount++;
+				
+				if (stenchCount > mostStench) {
+					result = new int[2];
+					result[0] = i;
+					result[1] = j;
+				}
+			}
+		}
+		return result;
+	}
+	
 	private void generateTileStates() {
 		states = new TileState[map.length][map[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
 				if (map[i][j] != null) {
 					states[i][j] = TileState.KNOWN;
+					if (map[i][j].isWall()) continue;
 					if (map[i][j].hasBreeze() || map[i][j].hasStench()) {
-						if (states[i+1][j] != TileState.KNOWN)
+						if (states[i+1][j] != TileState.KNOWN || states[i+1][j] != TileState.UNSAFE)
 							states[i+1][j] = TileState.UNSAFE;
-						if (states[i-1][j] != TileState.KNOWN)
+						if (states[i-1][j] != TileState.KNOWN || states[i-1][j] != TileState.UNSAFE)
 							states[i-1][j] = TileState.UNSAFE;
-						if (states[i][j+1] != TileState.KNOWN)
+						if (states[i][j+1] != TileState.KNOWN || states[i][j+1] != TileState.UNSAFE)
 							states[i][j+1] = TileState.UNSAFE;
-						if (states[i][j-1] != TileState.KNOWN)
+						if (states[i][j-1] != TileState.KNOWN || states[i][j-1] != TileState.UNSAFE)
 							states[i][j-1] = TileState.UNSAFE;
 					} else {
-						if (states[i+1][j] != TileState.KNOWN || states[i+1][j] != TileState.UNSAFE)
+						if (states[i+1][j] != TileState.KNOWN)
 							states[i+1][j] = TileState.SAFE;
-						if (states[i-1][j] != TileState.KNOWN || states[i-1][j] != TileState.UNSAFE)
+						if (states[i-1][j] != TileState.KNOWN)
 							states[i-1][j] = TileState.SAFE;
-						if (states[i][j+1] != TileState.KNOWN || states[i][j+1] != TileState.UNSAFE)
+						if (states[i][j+1] != TileState.KNOWN)
 							states[i][j+1] = TileState.SAFE;
-						if (states[i][j-1] != TileState.KNOWN || states[i][j-1] != TileState.UNSAFE)
+						if (states[i][j-1] != TileState.KNOWN)
 							states[i][j-1] = TileState.SAFE;
 					}
 				} else {
@@ -293,7 +346,20 @@ public class State implements Comparable<State> {
 		String result = "";
 		for (TileState[] l : states) {
 			for (TileState t : l) {
-				result += t;
+				switch (t) {
+				case UNKNOWN:
+					result += "U";
+					break;
+				case KNOWN:
+					result += " ";
+					break;
+				case SAFE:
+					result += "S";
+					break;
+				case UNSAFE:
+					result += "X";
+					break;
+				}
 			}
 			result += '\n';
 		}

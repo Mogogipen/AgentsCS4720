@@ -18,8 +18,10 @@ public class AgentBrain {
 	
 	//My Variables
 	private LinkedList<AgentAction> actionQueue;
-	private boolean hasGold = false; //TODO Temp value, change to false in the future
+	private boolean explored = false;
+	private boolean explored2 = false;
 	private boolean shotArrow = false;
+	private boolean hasGold = false; //TODO Temp value, change to false in the future
 	private boolean foundExit = false;
 	private boolean inProgress = false;
 	
@@ -67,25 +69,49 @@ public class AgentBrain {
 			int[] pos = new int[2];
 			pos = findPlayer(visibleMap);
 			
-			
 			// Runs old method if the whole map is visible
 			if (allVisible(visibleMap))
 				return allVisibleMethod(visibleMap, pos);
 			
 			// Otherwise, use the new method
-			return normalMethod(visibleMap, pos);
+			AgentAction a = normalMethod(visibleMap, pos);
+			System.out.println(a);
+			return a;
 		}
 	}
 	
 	private AgentAction normalMethod(GameTile[][] visibleMap, int[] pos) {
-		if (currentNumMoves < 2) {
-			currentNumMoves++;
-			return AgentAction.moveRight;
-		}
 		
 		if (!inProgress) {
-			BFS(visibleMap, pos[0], pos[1], FINDEXIT);
-			inProgress = true;
+			
+			if (visibleMap[0][0].heardScream() && !explored2) {
+				explored = false;
+				explored2 = true;
+			}
+			
+			// Check if current spot has gold
+			if (visibleMap[pos[0]][pos[1]].hasGlitter()) {
+				hasGold = true;
+				return AgentAction.pickupSomething;
+			}
+			
+			// Explore the whole map for the gold
+			if (!explored && !hasGold) {
+				BFS(visibleMap, pos[0], pos[1], FINDSAFE);
+				inProgress = true;
+			}
+			
+			// If the gold isn't found by the end of exploration: find and shoot the wumpus
+			else if (explored && !shotArrow && !hasGold) {
+				BFS(visibleMap, pos[0], pos[1], KILLWUMPUS);
+				inProgress = true;
+			}
+			
+			else {
+				BFS(visibleMap, pos[0], pos[1], FINDEXIT);
+				inProgress = true;
+			}
+			
 		}
 		if (!actionQueue.isEmpty()) {
 			currentNumMoves++;
@@ -97,6 +123,7 @@ public class AgentBrain {
 	}
 	
 	private AgentAction allVisibleMethod(GameTile[][] visibleMap, int[] pos) {
+		
 		if (!inProgress) {
 			// First assignment: find the exit
 			if (shotArrow && hasGold && !foundExit) {
@@ -115,8 +142,9 @@ public class AgentBrain {
 				BFS(visibleMap, pos[0], pos[1], KILLWUMPUS);
 				inProgress = true;
 			}
+
 		}
-		
+			
 		if (!actionQueue.isEmpty()) {
 			currentNumMoves++;
 			return actionQueue.pop();
@@ -143,7 +171,7 @@ public class AgentBrain {
 					actionQueue = currentState.getActions();
 					
 					// After 10 games, the agent quits rather than declares victory
-					if (numGamesPlayed >= 10)
+					if (numGamesPlayed >= 20)
 						actionQueue.add(AgentAction.quit);
 					else actionQueue.add(AgentAction.declareVictory);
 					
@@ -152,11 +180,21 @@ public class AgentBrain {
 					break;
 				}
 			} else if (KILLWUMPUS == find) {
-				State shot = currentState.tryArrowShot();
-				if (shot != null) {
-					actionQueue = shot.getActions();
-					shotArrow = true;
+				int dir = currentState.byWumpus();
+				if (dir != 0) {
+					actionQueue  = currentState.getActions();
 					goalReached = true;
+					shotArrow = true;
+					if (dir == 1)
+						actionQueue.add(AgentAction.shootArrowNorth);
+					else if (dir == 2)
+						actionQueue.add(AgentAction.shootArrowEast);
+					else if (dir == 3)
+						actionQueue.add(AgentAction.shootArrowSouth);
+					else if (dir == 4)
+						actionQueue.add(AgentAction.shootArrowWest);
+					else
+						System.out.println("Invalid shoot direction (byWumpus check)");
 					break;
 				}
 			} else if (FINDGOLD == find) {
@@ -166,7 +204,16 @@ public class AgentBrain {
 					goalReached = true;
 					break;
 				}
+
 			} else if (FINDSAFE == find) {
+				// Case of state not having a safe tile
+				if (!currentState.hasSafeTile()) {
+					actionQueue = new LinkedList<AgentAction>();
+					actionQueue.add(AgentAction.doNothing);
+					goalReached = true;
+					explored = true;
+					break;
+				}
 				int dir = currentState.bySafeTile();
 				if (dir > 0) {
 					actionQueue = currentState.getActions();
@@ -183,6 +230,7 @@ public class AgentBrain {
 						System.err.println("Invalid movement value (safeTile check)");
 					break;
 				}
+
 			} else {
 				System.err.println("Invalid search goal");
 			}
@@ -226,14 +274,6 @@ public class AgentBrain {
 		}
 	}
 	
-	private boolean allVisible(GameTile[][] visibleMap) {
-		for (int i = 0; i < visibleMap.length; i++)
-			for (int j = 0; j < visibleMap[0].length; j++)
-				if (visibleMap[i][j] == null)
-					return false;
-		return true;
-	}
-	
 	private int[] findPlayer(GameTile[][] visibleMap) {
 		int[] result = new int[2];
 		for (int i = 0; i < visibleMap.length; i++) {
@@ -245,6 +285,14 @@ public class AgentBrain {
 			}
 		}
 		return result;
+	}
+
+	private boolean allVisible(GameTile[][] visibleMap) {
+		for (GameTile[] l : visibleMap)
+			for (GameTile t : l)
+				if (t == null)
+					return false;
+		return true;
 	}
 
 }
