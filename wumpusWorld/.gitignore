@@ -4,3 +4,5 @@
 /GameTile.class
 /Screen.class
 /State.class
+/AgentBrain$TileType.class
+/State$TileState.class

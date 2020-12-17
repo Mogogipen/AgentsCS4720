@@ -75,7 +75,8 @@ public class AgentBrain {
 			
 			// Otherwise, use the new method
 			AgentAction a = normalMethod(visibleMap, pos);
-			System.out.println(a);
+			if (a != AgentAction.doNothing)
+				currentNumMoves++;
 			return a;
 		}
 	}
@@ -197,13 +198,6 @@ public class AgentBrain {
 						System.out.println("Invalid shoot direction (byWumpus check)");
 					break;
 				}
-//				State shot = currentState.tryArrowShot();
-//				if (shot != null) {
-//					actionQueue = shot.getActions();
-//					shotArrow = true;
-//					goalReached = true;
-//					break;
-//				}
 			} else if (FINDGOLD == find) {
 				if (currentState.hasGold()) {
 					actionQueue = currentState.getActions();
@@ -285,7 +279,7 @@ public class AgentBrain {
 		int[] result = new int[2];
 		for (int i = 0; i < visibleMap.length; i++) {
 			for (int j = 0; j < visibleMap[0].length; j++) {
-				if (visibleMap[i][j].hasPlayer()) {
+				if (visibleMap[i][j] != null && visibleMap[i][j].hasPlayer()) {
 					result[0] = i;
 					result[1] = j;
 				}
@@ -301,3 +295,5 @@ public class AgentBrain {
 					return false;
 		return true;
 	}
+
+}

@@ -74,6 +74,7 @@ public class GameTile {
 		hasBreeze = t.hasBreeze;
 		hasStench = t.hasStench;
 		hasPlayer = t.hasPlayer;
+		heardScream = t.heardScream;
 	}
 	
 
