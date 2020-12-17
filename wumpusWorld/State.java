@@ -2,20 +2,10 @@ package wumpusWorld;
 import java.util.LinkedList;
 
 public class State implements Comparable<State> {
-	
-	enum TileState {
-		UNKNOWN,
-		KNOWN,
-		SAFE,
-		UNSAFE
-	}
-	
 	private GameTile[][] map;
-	public int xPos;
-	public int yPos;
+	private int xPos;
+	private int yPos;
 	private LinkedList<AgentAction> actionsToCurrentState;
-	
-	private static TileState[][] states;
 	
 	private int distance;
 	private boolean aStar;
@@ -38,16 +28,13 @@ public class State implements Comparable<State> {
 		yPos = y;
 		actionsToCurrentState = new LinkedList<AgentAction>();
 		aStar = false;
-		generateTileStates();
-		printTileStates();
 	}
 	
 	State(State s) {
 		map = new GameTile[s.map.length][s.map[0].length];
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				if (s.map[i][j] != null)
-					map[i][j] = new GameTile(s.map[i][j]);
+				map[i][j] = new GameTile(s.map[i][j]);
 			}
 		}
 		actionsToCurrentState = new LinkedList<AgentAction>(s.actionsToCurrentState);
@@ -90,14 +77,9 @@ public class State implements Comparable<State> {
 		return new State(this, xPos+1, yPos, AgentAction.moveDown);
 	}
 	
-	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
-	public boolean canMoveTo(GameTile t) {
-		return !(t == null || t.isWall() || t.hasWumpus() || t.hasPit());
-	}
-	
 	// Pickup
 	public State pickUp() {
-		if (map[xPos][yPos] != null && map[xPos][yPos].hasGlitter()) {
+		if (map[xPos][yPos].hasGlitter()) {
 			State result = new State(this, xPos, yPos, AgentAction.pickupSomething);
 			result.map[xPos][yPos].setGlitter(false);
 			return result;
@@ -175,6 +157,13 @@ public class State implements Comparable<State> {
 		return this;
 	}
 	
+	//TODO Add new actions
+	
+	// Returns false if the agent would die, doesn't know the tile, or it's a wall.
+	public boolean canMoveTo(GameTile t) {
+		return !(t == null || t.isWall() || t.hasWumpus() || t.hasPit() || !t.hasBeenDiscovered());
+	}
+	
 	//
 	// Goal state checkers
 	//
@@ -234,7 +223,7 @@ public class State implements Comparable<State> {
 					return true;
 		return false;
 	}
-	
+
 	public boolean hasGold() {
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
@@ -251,16 +240,6 @@ public class State implements Comparable<State> {
 		return false;
 	}
 	
-	private boolean hasWumpus() {
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j].hasWumpus())
-					return true;
-			}
-		}
-		return false;
-	}
-	
 	//
 	// Miscellaneous
 	//
@@ -269,10 +248,7 @@ public class State implements Comparable<State> {
 		String result = String.format("%2d%2d", xPos, yPos);
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[0].length; j++) {
-				if (map[i][j] == null)
-					result += "U";
-				else
-					result += map[i][j].toHashable();
+				result += map[i][j].toHashable();
 			}
 		}
 		return result;
@@ -361,9 +337,18 @@ public class State implements Comparable<State> {
 					break;
 				}
 			}
-			result += '\n';
 		}
 		System.out.println(result);
+	}
+
+	private boolean hasWumpus() {
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+				if (map[i][j].hasWumpus())
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	//
